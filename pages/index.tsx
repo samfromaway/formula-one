@@ -26,10 +26,8 @@ const Home: NextPage = () => {
       </Head>
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
       <Spacer space={2} />
-      <TextField id="outlined-basic" label="Outlined" variant="outlined" />
-
       <PageFallback isLoading={isLoading} errors={errors}>
-        <RacesPage races={makeRaces(races)} isUserTime={isUserTime} />
+        <RacesPage races={data} isUserTime={isUserTime} />
       </PageFallback>
     </>
   );
