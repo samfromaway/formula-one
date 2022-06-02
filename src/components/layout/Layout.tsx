@@ -7,10 +7,10 @@ import Spacer from './Spacer';
 
 type LayoutProps = {
   children: React.ReactNode;
-  toggleThemeMode: () => void;
+  toggleDarkMode: () => void;
 };
 
-export default function Layout({ children, toggleThemeMode }: LayoutProps) {
+export default function Layout({ children, toggleDarkMode }: LayoutProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const toggleDrawer =
@@ -28,7 +28,7 @@ export default function Layout({ children, toggleThemeMode }: LayoutProps) {
     <>
       {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
       <CssBaseline />
-      <AppBar toggleDrawer={toggleDrawer} toggleThemeMode={toggleThemeMode} />
+      <AppBar toggleDrawer={toggleDrawer} toggleDarkMode={toggleDarkMode} />
       <Drawer toggleDrawer={toggleDrawer} isOpen={isDrawerOpen} />
       <Spacer space={2} />
       <Container maxWidth="lg">{children}</Container>

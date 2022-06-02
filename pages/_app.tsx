@@ -4,11 +4,11 @@ import { ThemeProvider } from '@mui/material/styles';
 import { CacheProvider, EmotionCache } from '@emotion/react';
 import { darkTheme, lightTheme } from '@/styles/theme';
 import createEmotionCache from '@/styles/createEmotionCache';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Layout } from '@/components/layout';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import '@fontsource/titillium-web/600.css';
 import '@fontsource/titillium-web/700.css';
+import useDarkMode from '@/utils/useDarkMode';
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -19,17 +19,8 @@ interface MyAppProps extends AppProps {
 
 export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleThemeMode = () => setIsDarkMode((prev) => !prev);
-
-  useEffect(() => {
-    if (prefersDarkMode) {
-      setIsDarkMode(prefersDarkMode);
-    }
-  }, [prefersDarkMode]);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const currentTheme = useMemo(
     () => (isDarkMode ? darkTheme : lightTheme),
@@ -42,7 +33,7 @@ export default function MyApp(props: MyAppProps) {
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
       <ThemeProvider theme={currentTheme}>
-        <Layout toggleThemeMode={toggleThemeMode}>
+        <Layout toggleDarkMode={toggleDarkMode}>
           <Component {...pageProps} />
         </Layout>
       </ThemeProvider>

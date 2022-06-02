@@ -9,9 +9,9 @@ import { useTheme } from '@mui/system';
 import { Box } from '@mui/material';
 import { ToggleDrawer } from './types';
 
-type AppBarProps = { toggleDrawer: ToggleDrawer; toggleThemeMode: () => void };
+type AppBarProps = { toggleDrawer: ToggleDrawer; toggleDarkMode: () => void };
 
-export default function AppBar({ toggleDrawer, toggleThemeMode }: AppBarProps) {
+export default function AppBar({ toggleDrawer, toggleDarkMode }: AppBarProps) {
   const { palette } = useTheme();
 
   return (
@@ -29,7 +29,7 @@ export default function AppBar({ toggleDrawer, toggleThemeMode }: AppBarProps) {
         </IconButton>
         <Typography variant="h6">Formula 1 Info</Typography>
         <Box flex={1} />
-        <IconButton onClick={toggleThemeMode} color="inherit">
+        <IconButton onClick={toggleDarkMode} color="inherit">
           {palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
         </IconButton>
       </Toolbar>
