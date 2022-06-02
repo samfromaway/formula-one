@@ -8,7 +8,7 @@ import { Box, Typography } from '@mui/material';
 import { Spacer } from '@/components/layout';
 
 type RacesPageProps = {
-  races: Race[];
+  races: Race[] | null;
   isUserTime: boolean;
 };
 

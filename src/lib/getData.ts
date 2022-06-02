@@ -37,10 +37,10 @@ export default async function getData<T>(
       });
       const data = await res.json();
 
-      if (data.errors) {
+      if (!!data.errors && data.errors.length !== 0) {
         return { data: null, errors: data.errors };
       }
-      if (data == null) {
+      if (!data || !data.response) {
         return { data: null, errors: 'no data returned' };
       }
 

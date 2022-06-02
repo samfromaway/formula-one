@@ -6,22 +6,24 @@ export default function useData<T>(
   fetch: Fetch<T>,
   dependencies: string[] | []
 ) {
-  const [data, setData] = useState<T | []>([]);
+  const [data, setData] = useState<T | null>(null);
   const [errors, setErrors] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
+    setData(null);
+    setErrors(null);
     const getData = async () => {
       const data = await fetch();
 
       if (data.errors) {
         setErrors(data.errors);
       } else {
-        setData(data.data || []);
+        setData(data.data || null);
       }
+      setIsLoading(false);
     };
-    setIsLoading(false);
 
     getData();
 

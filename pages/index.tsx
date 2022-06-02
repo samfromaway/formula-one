@@ -25,7 +25,6 @@ const Home: NextPage = () => {
         <title>Formula 1 Info: Races</title>
       </Head>
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
-      <Spacer space={2} />
       <PageFallback isLoading={isLoading} errors={errors}>
         <RacesPage races={data} isUserTime={isUserTime} />
       </PageFallback>

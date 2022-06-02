@@ -15,7 +15,11 @@ export default function PageFallback({
 }: PageFallbackProps) {
   return (
     <>
-      {isLoading && <CircularProgress />}
+      {isLoading && (
+        <Box p={4}>
+          <CircularProgress />
+        </Box>
+      )}
       {!isLoading && errors && (
         <Box>
           <Typography variant="h4" gutterBottom>
