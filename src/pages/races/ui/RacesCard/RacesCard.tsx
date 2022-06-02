@@ -117,17 +117,30 @@ export default function RacesCard({
             {!isCompleted && (
               <Grid item xs={12}>
                 <Typography gutterBottom>{circuit}</Typography>
-                <Box
-                  sx={{
-                    backgroundColor:
-                      palette.mode === 'dark' ? '#ffffffcc' : '#f4f4f4cc',
-                    backgroundImage: BACKGROUND_IMG,
-                    borderRadius: 2,
-                  }}
-                  //  bgcolor={palette.mode === 'dark' ? '#ffffffcc' : '#f4f4f4cc'} DOES WORK
-                  // backgroundImage={BACKGROUND_IMG} DOES NOT WORK
-                  // borderRadius={2} DOES NOT WORK
-                >
+                <Box position="relative" borderRadius={2}>
+                  <Box
+                    borderRadius={2}
+                    height="100%"
+                    width="100%"
+                    sx={{
+                      backgroundImage:
+                        'linear-gradient(to right, #d5ab63 , #952626)',
+                    }}
+                    position="absolute"
+                  />
+                  <Box
+                    borderRadius={2}
+                    height="100%"
+                    width="100%"
+                    position="absolute"
+                    sx={{
+                      backgroundImage: BACKGROUND_IMG,
+                      borderRadius: 2,
+                    }}
+                    //  bgcolor={palette.mode === 'dark' ? '#ffffffcc' : '#f4f4f4cc'} DOES WORK
+                    // backgroundImage={BACKGROUND_IMG} DOES NOT WORK
+                    // borderRadius={2} DOES NOT WORK
+                  />
                   <Image
                     src={img}
                     height="40px"

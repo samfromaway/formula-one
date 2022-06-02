@@ -1,5 +1,6 @@
 import Grid from '@mui/material/Grid';
 import RacesCard from './ui/RacesCard/RacesCard';
+import Timer from './ui/Timer';
 import { Race } from './lib/getRaces';
 import { makeDateRange } from './utils';
 import isBefore from 'date-fns/isBefore';
@@ -21,6 +22,8 @@ const RacesPage = ({ races, isUserTime }: RacesPageProps) => {
     <>
       <Typography variant="h4">Next Race:</Typography>
       <Spacer space={2} />
+      <Timer date={nextRace.date} />
+      <Spacer space={3} />
       <Box maxWidth={600}>
         <RacesCard
           round={nextRace.round}
