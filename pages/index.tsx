@@ -20,7 +20,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Formula 1 Info: Races</title>
+        <title>Formula 1: Races</title>
       </Head>
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
       <PageFallback isLoading={isLoading} errors={errors}>
