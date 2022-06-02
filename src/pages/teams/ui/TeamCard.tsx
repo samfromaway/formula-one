@@ -1,19 +1,23 @@
-import { Card, CardContent, CardMedia, Typography } from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Typography } from '@mui/material';
+import Image from 'next/image';
 
 type TeamCardProps = { img: string; name: string };
 
 export default function TeamCard({ img, name }: TeamCardProps) {
   return (
     <Card>
-      <CardMedia
-        component="img"
-        height="80px"
-        image={img}
-        alt={name}
-        sx={{ backgroundColor: 'white' }}
-      />
+      <Box bgcolor="white">
+        <Image
+          src={img}
+          layout="responsive"
+          height="60px"
+          width="100%"
+          alt={name}
+          objectFit="contain"
+        />
+      </Box>
       <CardContent>
-        <Typography component="div">{name}</Typography>
+        <Typography>{name}</Typography>
       </CardContent>
     </Card>
   );

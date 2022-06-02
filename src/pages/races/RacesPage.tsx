@@ -1,5 +1,5 @@
 import Grid from '@mui/material/Grid';
-import RacesCard from './ui/RacesCard';
+import RacesCard from './ui/RacesCard/RacesCard';
 import { Race } from './lib/getRaces';
 import { makeDateRange } from './utils';
 import isBefore from 'date-fns/isBefore';
