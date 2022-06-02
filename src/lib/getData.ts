@@ -1,6 +1,6 @@
 import { mainUrl } from './dbConnection';
 
-const USE_DB = false;
+const USE_DB = true;
 
 type GetDataResponse<T> = { data: T | null; errors: string | null };
 
