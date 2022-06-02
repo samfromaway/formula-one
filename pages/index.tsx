@@ -1,13 +1,11 @@
 import type { NextPage } from 'next';
 import { useState } from 'react';
 import { RacesPage } from '@/pages';
-import { SelectChangeEvent, TextField } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material';
 import TimezoneSelect from '@/pages/races/ui/TimezoneSelect';
-import { Spacer } from '@/components/layout';
 import useRaces from '@/pages/races/lib/useRaces';
 import Head from 'next/head';
 import PageFallback from '@/components/layout/PageFallback';
-import { makeRaces, races } from '@/pages/races/lib/getRaces';
 
 const Home: NextPage = () => {
   const [timezone, setTimezone] = useState('Your Time');
