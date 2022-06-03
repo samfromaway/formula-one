@@ -2,6 +2,31 @@ import type { NextPage } from 'next';
 import { Box, Grid, Typography } from '@mui/material';
 import { DynamicGrid } from '@/components/ui';
 
+const FlexGrid = () => {
+  return (
+    <Box display="flex">
+      <Box
+        bgcolor="primary.main"
+        color="white"
+        width="100%"
+        height="100%"
+        m={2}
+      >
+        Box
+      </Box>
+      <Box
+        bgcolor="primary.main"
+        color="white"
+        width="100%"
+        height="100%"
+        m={2}
+      >
+        Box
+      </Box>
+    </Box>
+  );
+};
+
 const SimpleGrid = () => {
   return (
     <Grid
@@ -58,6 +83,11 @@ const MappedGrid = () => {
 const MuiGridPage: NextPage = () => {
   return (
     <>
+      <Box bgcolor="gray" color="white">
+        Full Width Box
+      </Box>
+      <FlexGrid />
+      <Box p={2} />
       <Typography variant="h5">SimpleGrid</Typography>
       <SimpleGrid />
       <Box p={2} />
