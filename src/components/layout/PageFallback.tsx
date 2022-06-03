@@ -28,7 +28,7 @@ export default function PageFallback({
           {JSON.stringify(errors)}
         </Box>
       )}
-      <Spacer space={4} />
+
       {!isLoading && children}
     </>
   );

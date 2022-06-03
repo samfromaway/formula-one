@@ -6,6 +6,7 @@ import TimezoneSelect from '@/pages/races/ui/TimezoneSelect';
 import useRaces from '@/pages/races/lib/useRaces';
 import Head from 'next/head';
 import PageFallback from '@/components/layout/PageFallback';
+import { Spacer } from '@/components/layout';
 
 const Home: NextPage = () => {
   const [timezone, setTimezone] = useState('Your Time');
@@ -23,6 +24,7 @@ const Home: NextPage = () => {
         <title>Formula 1: Races</title>
       </Head>
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
+      <Spacer space={2} />
       <PageFallback isLoading={isLoading} errors={errors}>
         <RacesPage races={data} isUserTime={isUserTime} />
       </PageFallback>

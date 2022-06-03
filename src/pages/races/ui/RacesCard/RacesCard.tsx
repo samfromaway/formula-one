@@ -7,6 +7,7 @@ import { styled } from '@mui/material/styles';
 import RacesCardDates from './RacesCardDates';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
+import { Spacer } from '@/components/layout';
 
 type RacesCardProps = {
   round: number;
@@ -29,9 +30,6 @@ const RaceCardBorder = styled(Box)(({ theme }) => ({
   background: makeBorderGradient(theme.palette.text.primary),
   padding: '4px',
   borderRadius: 12,
-  // transition: theme.transitions.create(['box-shadow']),
-  // '&:hover': {},
-  // '&:focus': {},
 }));
 
 const RaceCard = styled(Box)(({ theme }) => ({ position: 'relative' }));
@@ -40,6 +38,7 @@ const RaceCardContent = styled(Box)(({ theme }) => ({
   borderRadius: 12,
   backgroundColor: theme.palette.background.paper,
   padding: theme.spacing(3),
+  paddingLeft: theme.spacing(1),
 }));
 
 const BACKGROUND_IMG = 'url("/grid.svg")';
@@ -71,7 +70,7 @@ export default function RacesCard({
         fontSize="1.25rem"
         position="absolute"
         top={-13}
-        left={0}
+        left={-12}
         zIndex={2}
         color={textColor}
       >
@@ -87,15 +86,16 @@ export default function RacesCard({
         }}
       >
         <RaceCardContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12} display="flex">
+          <Spacer space="3px" />
+          <Grid container spacing={1}>
+            <Grid item xs={12} display="flex" alignItems="center">
               <PublicIcon sx={{ marginRight: 2 }} />
               <Typography fontSize="1.125rem" color={textColor}>
                 {country}
               </Typography>
             </Grid>
             {isCompleted && (
-              <Grid item xs={12} display="flex">
+              <Grid item xs={12} display="flex" alignItems="center">
                 <AccessTimeIcon sx={{ marginRight: 2 }} />
                 <Typography fontSize="1.125rem" color={textColor}>
                   {dateRange}

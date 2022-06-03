@@ -24,7 +24,7 @@ const RacesPage = ({ races, isUserTime }: RacesPageProps) => {
       <Spacer space={2} />
       <Timer date={nextRace.date} />
       <Spacer space={3} />
-      <Box maxWidth={600}>
+      <Box maxWidth={400}>
         <RacesCard
           round={nextRace.round}
           country={nextRace.competition.location.country}

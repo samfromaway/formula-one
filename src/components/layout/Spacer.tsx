@@ -1,6 +1,6 @@
-import { Box } from '@mui/material';
+import { Box, BoxProps } from '@mui/material';
 
-type SpacerProps = { space: number };
+type SpacerProps = { space: BoxProps['p'] };
 
 export default function Spacer({ space }: SpacerProps) {
   return <Box p={space} />;

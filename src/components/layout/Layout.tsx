@@ -32,6 +32,7 @@ export default function Layout({ children, toggleDarkMode }: LayoutProps) {
       <Drawer toggleDrawer={toggleDrawer} isOpen={isDrawerOpen} />
       <Spacer space={2} />
       <Container maxWidth="lg">{children}</Container>
+      <Spacer space={2} />
     </>
   );
 }
