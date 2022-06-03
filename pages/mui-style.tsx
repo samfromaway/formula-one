@@ -8,7 +8,7 @@ const sxStyle = {
   width: 200,
   height: 100,
   border: 'solid 10px orange',
-  color: 'primary.main',
+  color: ['blue', 'primary.main'],
   paddingLeft: 2,
   '&:hover': { borderColor: 'blue' },
   transition: (theme: Theme) => theme.transitions.create(['border-color']),
@@ -22,6 +22,9 @@ const StyledBox = styled(Box)(({ theme }) => ({
   border: 'solid 10px orange',
   //  color: 'primary.main', does not work
   color: theme.palette.primary.main,
+  [theme.breakpoints.down('sm')]: {
+    color: 'blue',
+  },
   paddingLeft: theme.spacing(2),
   '&:hover': { borderColor: 'blue' },
   transition: theme.transitions.create(['border-color']),
@@ -33,8 +36,8 @@ const inlineStyle = {
   backgroundColor: '#f5f5dc',
   width: 200,
   height: 100,
-  border: 'solid 10px blue',
-  // color: 'primary.main', does not work
+  border: 'solid 10px orange',
+  // color: 'primary.main', does not work and no breakpoints possible
   paddingLeft: 2, // will be in pixel and not reference the theme
   // '&:hover': { backgroundColor: 'blue' }, does not work
   // transition: (theme: Theme) => theme.transitions.create(['border-color']), does not work
@@ -49,8 +52,8 @@ const MuiStylePage: NextPage = () => {
           bgcolor="#f5f5dc"
           width={200}
           height={100}
-          border="solid 10px blue"
-          color="primary.main"
+          border="solid 10px orange"
+          color={['blue', 'primary.main']}
           paddingLeft={2}
           // '&:hover': { backgroundColor: 'blue' }, does not work
           // transition: (theme: Theme) => theme.transitions.create(['border-color']), does not work
