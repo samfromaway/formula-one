@@ -1,10 +1,10 @@
 import { createTheme } from '@mui/material/styles';
-import { Theme, ThemeOptions } from '@mui/system';
 
 const sharedTheme = {
   typography: {
     fontFamily: 'Titillium Web, sans-serif',
   },
+  //  spacing: ['8px','16px','24px' ...],
 };
 
 export const lightTheme = createTheme({

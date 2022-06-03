@@ -25,10 +25,10 @@ const StyledBox = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     color: 'blue',
   },
+  //  paddingLeft: 2, will be in pixel and not reference the theme
   paddingLeft: theme.spacing(2),
   '&:hover': { borderColor: 'blue' },
   transition: theme.transitions.create(['border-color']),
-  //  paddingLeft: 2, will be in pixel and not reference the theme
 }));
 
 const inlineStyle = {
