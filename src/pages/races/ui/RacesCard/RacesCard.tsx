@@ -87,7 +87,7 @@ export default function RacesCard({
       >
         <RaceCardContent>
           <Spacer space="3px" />
-          <Grid container spacing={1}>
+          <Grid container spacing={2}>
             <Grid item xs={12} display="flex" alignItems="center">
               <PublicIcon sx={{ marginRight: 2 }} />
               <Typography fontSize="1.125rem" color={textColor}>
