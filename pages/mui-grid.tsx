@@ -10,7 +10,7 @@ const FlexGrid = () => {
         color="white"
         width="100%"
         height="100%"
-        m={2}
+        m="20px"
       >
         Box
       </Box>
@@ -19,7 +19,7 @@ const FlexGrid = () => {
         color="white"
         width="100%"
         height="100%"
-        m={2}
+        m="20px"
       >
         Box
       </Box>
@@ -31,9 +31,9 @@ const SimpleGrid = () => {
   return (
     <Grid
       container
-      spacing={3}
-      // rowSpacing={1}
-      // columnSpacing={1}
+      spacing="20px"
+      // rowSpacing="20px"
+      // columnSpacing="20px"
     >
       <Grid item xs={12} md={6}>
         <Box bgcolor="primary.main" color="white">
@@ -68,7 +68,7 @@ const items = [
 
 const MappedGrid = () => {
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing="20px">
       {items.map((e) => (
         <Grid key={e.id} item xs={12} md={6}>
           <Box bgcolor="primary.main" color="white">
@@ -95,7 +95,10 @@ const MuiGridPage: NextPage = () => {
       <MappedGrid />
       <Box p={2} />
       <Typography variant="h5">DynamicGrid</Typography>
-      <DynamicGrid maxColumns={{ xs: 1, sm: 1, md: 2, lg: 2 }} spacing={3}>
+      <DynamicGrid
+        maxColumns={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 2 }}
+        spacing="20px"
+      >
         {items.map((e) => (
           <Box key={e.id} bgcolor="primary.main" color="white">
             {e.name}

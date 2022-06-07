@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid } from '@mui/material';
+import { Grid, GridProps } from '@mui/material';
 
 type MaxColumns = {
   xs: number;
@@ -11,13 +11,13 @@ type MaxColumns = {
 type RowStartAlignment = 'left' | 'center';
 
 type DynamicGridProps = {
-  children: React.ReactNode & { length: number };
+  children: React.ReactNode[];
   maxColumns: MaxColumns;
   rowStartAlignment?: RowStartAlignment;
   fullWidth?: boolean;
-  spacing?: number;
-  columnSpacing?: number;
-  rowSpacing?: number;
+  spacing?: GridProps['spacing'];
+  columnSpacing?: GridProps['columnSpacing'];
+  rowSpacing?: GridProps['rowSpacing'];
 };
 
 const defaultProps = { rowStartAlignment: 'left' };
