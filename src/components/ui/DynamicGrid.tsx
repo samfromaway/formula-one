@@ -1,7 +1,13 @@
 import React from 'react';
 import { Grid } from '@mui/material';
 
-type MaxColumns = { xs: number; sm: number; md: number; lg: number };
+type MaxColumns = {
+  xs: number;
+  sm: number;
+  md: number;
+  lg: number;
+  xl: number;
+};
 type RowStartAlignment = 'left' | 'center';
 
 type DynamicGridProps = {
@@ -46,6 +52,7 @@ const DynamicGrid = ({
         makeWidth(maxColumns.sm),
         makeWidth(maxColumns.md),
         makeWidth(maxColumns.lg),
+        makeWidth(maxColumns.xl),
       ];
     };
 
@@ -56,6 +63,7 @@ const DynamicGrid = ({
         sm={rowNumber(maxColumns.sm)}
         md={rowNumber(maxColumns.md)}
         lg={rowNumber(maxColumns.lg)}
+        xl={rowNumber(maxColumns.xl)}
         width={width(maxColumns)}
       >
         {child}
@@ -82,6 +90,7 @@ const DynamicGrid = ({
       makeStyle(maxColumns.sm),
       makeStyle(maxColumns.md),
       makeStyle(maxColumns.lg),
+      makeStyle(maxColumns.xl),
     ];
   };
 

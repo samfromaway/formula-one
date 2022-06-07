@@ -7,6 +7,7 @@ import isBefore from 'date-fns/isBefore';
 import parseISO from 'date-fns/parseISO';
 import { Box, Typography } from '@mui/material';
 import { Spacer } from '@/components/layout';
+import { DynamicGrid } from '@/components/ui';
 
 type RacesPageProps = {
   races: Race[] | null;
@@ -42,6 +43,28 @@ const RacesPage = ({ races, isUserTime }: RacesPageProps) => {
       <Spacer space={4} />
       <Typography variant="h4">All Races:</Typography>
       <Spacer space={2} />
+      <DynamicGrid
+        spacing={4}
+        maxColumns={{ xs: 1, sm: 2, md: 3, lg: 3, xl: 3 }}
+        fullWidth
+      >
+        {races.map((e) => (
+          <RacesCard
+            key={e.id}
+            round={e.round}
+            country={e.competition.location.country}
+            dateRange={makeDateRange(e.events, isUserTime)}
+            timezone={e.timezone}
+            circuit={e.circuit.name}
+            img={e.circuit.image}
+            events={e.events}
+            status={e.status}
+            isNext={nextRace.id === e.id}
+            isUserTime={isUserTime}
+          />
+        ))}
+      </DynamicGrid>
+
       <Grid container spacing={4}>
         {races.map((e) => (
           <Grid item xs={12} sm={6} md={4} key={e.id}>
