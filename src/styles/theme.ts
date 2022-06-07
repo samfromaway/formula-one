@@ -15,6 +15,20 @@ export const lightTheme = createTheme({
       main: '#d42100',
     },
   },
+  //  secondary: { main: '#d42100', dark: '#d42100', light: '#d42100' },
+
+  //  spacing: ['8px','16px','24px' ...],
+  // typography: {
+  //   fontFamily: 'Titillium Web, sans-serif',
+  // },
+  // components: {
+  //   MuiButton: {
+  //     defaultProps: {
+  //       variant: 'contained',
+  //       color: 'secondary',
+  //     },
+  //   },
+  // },
 });
 
 export const darkTheme = createTheme({
