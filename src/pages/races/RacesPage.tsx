@@ -1,4 +1,3 @@
-import Grid from '@mui/material/Grid';
 import RacesCard from './ui/RacesCard/RacesCard';
 import Timer from './ui/Timer';
 import { Race } from './lib/getRaces';
@@ -8,6 +7,7 @@ import parseISO from 'date-fns/parseISO';
 import { Box, Typography } from '@mui/material';
 import { Spacer } from '@/components/layout';
 import { DynamicGrid } from '@/components/ui';
+import isPast from 'date-fns/isPast';
 
 type RacesPageProps = {
   races: Race[] | null;
@@ -16,14 +16,29 @@ type RacesPageProps = {
 
 const RacesPage = ({ races, isUserTime }: RacesPageProps) => {
   if (!races || races.length === 0) return null;
-  const allDates = races.filter((e) => !isBefore(parseISO(e.date), new Date()));
-  const nextRace = allDates[0];
+  const allFutureDates = races.filter(
+    (e) => !isBefore(parseISO(e.date), new Date())
+  );
+  const nextRace = allFutureDates[0];
+  const nextQualyDate = nextRace.events.find(
+    (e) => e.type === 'Qualifying'
+  )?.date;
+
+  const qualyHasPast = nextQualyDate ? isPast(parseISO(nextQualyDate)) : false;
+  const nextEventTitle = qualyHasPast ? 'Next Race' : 'Next Qualifying';
+
+  const displayTimerDate = () => {
+    if (!nextQualyDate) return nextRace.date;
+    if (qualyHasPast) return nextRace.date;
+    return nextQualyDate;
+  };
 
   return (
     <>
-      <Typography variant="h4">Next Race:</Typography>
+      <Typography variant="h4">{nextEventTitle}:</Typography>
       <Spacer space={2} />
-      <Timer date={nextRace.date} />
+      <Timer date={displayTimerDate()} />
+
       <Spacer space={3} />
       <Box maxWidth={400}>
         <RacesCard
