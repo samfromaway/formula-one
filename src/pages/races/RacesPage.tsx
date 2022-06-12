@@ -8,6 +8,7 @@ import { Box, Typography } from '@mui/material';
 import { Spacer } from '@/components/layout';
 import { DynamicGrid } from '@/components/ui';
 import isPast from 'date-fns/isPast';
+import { dateStringHasPassed } from '@/utils/dates';
 
 type RacesPageProps = {
   races: Race[] | null;
@@ -16,29 +17,46 @@ type RacesPageProps = {
 
 const RacesPage = ({ races, isUserTime }: RacesPageProps) => {
   if (!races || races.length === 0) return null;
-  const allFutureDates = races.filter(
-    (e) => !isBefore(parseISO(e.date), new Date())
+  const allUpcomingRaces = races.filter(
+    (e) => e.status === 'Live' || e.status === 'Scheduled'
   );
-  const nextRace = allFutureDates[0];
+
+  const nextRace = allUpcomingRaces[0];
+
   const nextQualyDate = nextRace.events.find(
     (e) => e.type === 'Qualifying'
   )?.date;
 
-  const qualyHasPast = nextQualyDate ? isPast(parseISO(nextQualyDate)) : false;
-  const nextEventTitle = qualyHasPast ? 'Next Race' : 'Next Qualifying';
+  const nextSprintDate = nextRace.events.find((e) => e.type === 'Sprint')?.date;
 
-  const displayTimerDate = () => {
-    if (!nextQualyDate) return nextRace.date;
-    if (qualyHasPast) return nextRace.date;
-    return nextQualyDate;
+  const qualyHasPast = nextQualyDate
+    ? dateStringHasPassed(nextQualyDate)
+    : null;
+
+  const sprintHasPast = nextSprintDate
+    ? dateStringHasPassed(nextSprintDate)
+    : null;
+
+  const nextEvent = () => {
+    if (nextRace.status === 'Live') return { title: 'Live', date: null };
+    if (qualyHasPast && sprintHasPast)
+      return { title: 'Next Race', date: nextRace.date };
+    if (qualyHasPast && nextSprintDate)
+      return { title: 'Next Sprint', date: nextSprintDate };
+    return { title: 'Next Qualifying', date: nextQualyDate };
   };
+
+  const nextEventData = nextEvent();
 
   return (
     <>
-      <Typography variant="h4">{nextEventTitle}:</Typography>
-      <Spacer space={2} />
-      <Timer date={displayTimerDate()} />
-
+      <Typography variant="h4">{nextEventData.title}:</Typography>
+      {nextEventData.date && (
+        <>
+          <Spacer space={2} />
+          <Timer date={nextEventData.date} />
+        </>
+      )}
       <Spacer space={3} />
       <Box maxWidth={400}>
         <RacesCard

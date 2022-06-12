@@ -1,5 +1,6 @@
 import parseISO from 'date-fns/parseISO';
 import format from 'date-fns/format';
+import isPast from 'date-fns/isPast';
 
 const DEFAULT_DATE_FORMAT = 'dd MMM';
 const DEFAULT_TIME_FORMAT = 'haaa';
@@ -32,4 +33,8 @@ export function formatTimeFromISOString(
   isUserTime: boolean
 ) {
   return formatDate(dateString, isUserTime, DEFAULT_TIME_FORMAT);
+}
+
+export function dateStringHasPassed(dateString: string) {
+  return isPast(parseISO(dateString));
 }
