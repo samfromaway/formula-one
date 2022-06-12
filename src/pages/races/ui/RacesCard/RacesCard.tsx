@@ -137,9 +137,6 @@ export default function RacesCard({
                       backgroundImage: BACKGROUND_IMG,
                       borderRadius: 2,
                     }}
-                    //  bgcolor={palette.mode === 'dark' ? '#ffffffcc' : '#f4f4f4cc'} DOES WORK
-                    // backgroundImage={BACKGROUND_IMG} DOES NOT WORK
-                    // borderRadius={2} DOES NOT WORK
                   />
                   <Image
                     src={img}
