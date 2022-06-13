@@ -2920,7 +2920,7 @@ const mapRaces = (races: RaceData[]) => {
       timezone: race.timezone,
     };
 
-    const currentRace = acc.find(
+    const currentRace: MapedRace | undefined = acc.find(
       (e) => e.competition.id === race.competition.id
     );
 
@@ -2950,33 +2950,10 @@ const mapRaces = (races: RaceData[]) => {
 export const makeRaces = (races: RaceData[] | null) => {
   if (races == null) return null;
 
-  const eventSort = (type: string) => {
-    switch (type) {
-      case 'Race':
-        return 1;
-      case 'Sprint':
-        return 2;
-      case 'Qualifying':
-        return 3;
-      case '3rd Practice':
-        return 4;
-      case '2nd Practice':
-        return 5;
-      case '1st Practice':
-        return 6;
-      default:
-        return 0;
-    }
-  };
-
   const filteredRaces = races.filter((e) => e.status !== 'Cancelled');
   const mapedRaces = mapRaces(filteredRaces);
-  const orderedEventsRaces = mapedRaces.map((e) => ({
-    ...e,
-    events: e.events.sort((a, b) => eventSort(a.type) - eventSort(b.type)),
-  }));
 
-  const orderedRaces = orderedEventsRaces.sort(
+  const orderedRaces = mapedRaces.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
