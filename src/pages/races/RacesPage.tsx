@@ -38,11 +38,18 @@ const RacesPage = ({ races, isUserTime }: RacesPageProps) => {
     : null;
 
   const nextEvent = () => {
-    if (nextRace.status === 'Live') return { title: 'Live', date: null };
-    if (qualyHasPast && sprintHasPast)
+    if (nextRace.status === 'Live') {
+      return { title: 'Live', date: null };
+    }
+    if (qualyHasPast && sprintHasPast) {
       return { title: 'Next Race', date: nextRace.date };
-    if (qualyHasPast && nextSprintDate)
+    }
+    if (qualyHasPast) {
+      return { title: 'Next Race', date: nextRace.date };
+    }
+    if (qualyHasPast && nextSprintDate) {
       return { title: 'Next Sprint', date: nextSprintDate };
+    }
     return { title: 'Next Qualifying', date: nextQualyDate };
   };
 
