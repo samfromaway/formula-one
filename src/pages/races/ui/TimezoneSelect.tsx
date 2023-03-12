@@ -13,7 +13,7 @@ type TimezoneSelectProps = {
 
 const OPTIONS = [
   'Your Time',
-  'Europe/Rome',
+  'Europe/Zurich',
   'Europe/London',
   'Africa/Sao_Tome',
   'America/Bogota',
