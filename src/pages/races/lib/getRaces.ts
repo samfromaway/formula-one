@@ -2969,7 +2969,7 @@ export default async function getRaces(timezone: string): Promise<GetRaces> {
   const currentTimezone = timezone === 'Your Time' ? 'Europe/Rome' : timezone;
 
   const { data, errors } = await getData<RaceData[]>(races, 'races', {
-    season: '2023',
+    season: '2024',
     timezone: currentTimezone,
   });
 

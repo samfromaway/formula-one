@@ -29,7 +29,7 @@ export default async function getData<T>(
       method: 'GET',
       headers: {
         'x-rapidapi-host': 'api-formula-1.p.rapidapi.com',
-        'x-rapidapi-key': '0f2fb9a6e43206a0f37c4b67ad022417',
+        'x-rapidapi-key': '0f2fb9a6e43206a0f37c4b67ad022417', // should usually be in .env
       },
     });
     const data = await res.json();
