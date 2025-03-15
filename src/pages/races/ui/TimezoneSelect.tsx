@@ -12,7 +12,7 @@ type TimezoneSelectProps = {
 };
 
 const OPTIONS = [
-  'Your Time',
+  'UTC',
   'Europe/Zurich',
   'Europe/London',
   'Africa/Sao_Tome',

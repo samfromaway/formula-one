@@ -9,14 +9,14 @@ import PageFallback from '@/components/layout/PageFallback';
 import { Spacer } from '@/components/layout';
 
 const Home: NextPage = () => {
-  const [timezone, setTimezone] = useState('Your Time');
-  const { data, errors, isLoading } = useRaces(timezone);
-
-  const isUserTime = timezone === 'Your Time';
+  const [timezone, setTimezone] = useState('UTC');
+  const { data, errors, isLoading } = useRaces();
 
   const handleTimezoneChange = (event: SelectChangeEvent<string>) => {
     setTimezone(event.target.value);
   };
+
+  const racesWithCorrectTime = data?.map((e) => e);
 
   return (
     <>
@@ -26,7 +26,7 @@ const Home: NextPage = () => {
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
       <Spacer space={2} />
       <PageFallback isLoading={isLoading} errors={errors}>
-        <RacesPage races={data} isUserTime={isUserTime} />
+        <RacesPage races={data} timezone={timezone} />
       </PageFallback>
     </>
   );

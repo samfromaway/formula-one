@@ -11,13 +11,12 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { RaceEvent } from '../../lib/getRaces';
+import { Race } from '../../lib/getRaces';
 
 type RacesCardDatesProps = {
   dateRange: string;
   timezone: string;
-  events: RaceEvent[];
-  isUserTime: boolean;
+  events: Race['events'];
   expandedByDefault?: boolean;
 };
 
@@ -37,7 +36,6 @@ const RacesCardDates = ({
   dateRange,
   timezone,
   events,
-  isUserTime,
   expandedByDefault,
 }: RacesCardDatesProps) => {
   return (
@@ -63,9 +61,10 @@ const RacesCardDates = ({
               </Grid>
               <Grid item xs={7}>
                 <Typography>
-                  {formatDateFromISOString(e.date, isUserTime)}
+                  {e.date} - {e.time}
+                  {/* {formatDateFromISOString(e.date, isUserTime)}
                   {' - '}
-                  {formatTimeFromISOString(e.date, isUserTime)}
+                  {formatTimeFromISOString(e.date, isUserTime)} */}
                 </Typography>
               </Grid>
             </Grid>
