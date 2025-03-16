@@ -1,26 +1,23 @@
 import { Box, Typography, Grid } from '@mui/material';
-import Image from 'next/image';
 import { useTheme } from '@mui/system';
 import PublicIcon from '@mui/icons-material/Public';
-import { RaceEvent, RaceStatus } from '../../lib/getRaces';
+import { Race, RaceEvent, RaceWTimezone } from '../../lib/getRaces';
 import { styled } from '@mui/material/styles';
 import RacesCardDates from './RacesCardDates';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import { Spacer } from '@/components/layout';
+import { formatDateFromISOString } from '@/utils/dates';
 
 type RacesCardProps = {
-  round: number;
-  dateRange: string;
+  round: string;
   country: string;
   circuit: string;
-  img: string;
   timezone: string;
-  events: RaceEvent[];
-  status: RaceStatus;
+  events: RaceWTimezone[number]['events'];
   isNext: boolean;
-  isUserTime: boolean;
   expandedByDefault?: boolean;
+  isCompleted: boolean;
 };
 
 const makeBorderGradient = (color: string) =>
@@ -41,24 +38,30 @@ const RaceCardContent = styled(Box)(({ theme }) => ({
   paddingLeft: theme.spacing(1),
 }));
 
-const BACKGROUND_IMG = 'url("/grid.svg")';
-
 export default function RacesCard({
   round,
-  dateRange,
   country,
   circuit,
-  img,
   timezone,
   events,
-  status,
   isNext,
-  isUserTime,
   expandedByDefault,
+  isCompleted,
 }: RacesCardProps) {
   const { palette } = useTheme();
-  const isCompleted = status === 'Completed';
   const textColor = isCompleted ? 'text.secondary' : undefined;
+
+  const makeDateRange = (raceEvents: RaceEvent[]) => {
+    const firstEvent = raceEvents[0];
+    const lastEvent = raceEvents[raceEvents.length - 1];
+
+    const firstDate = formatDateFromISOString(firstEvent.date);
+    const lastDate = formatDateFromISOString(lastEvent.date);
+
+    return { firstDate, lastDate };
+  };
+
+  const dateRange = makeDateRange(events);
 
   return (
     <RaceCard>
@@ -98,17 +101,16 @@ export default function RacesCard({
               <Grid item xs={12} display="flex" alignItems="center">
                 <AccessTimeIcon sx={{ marginRight: 2 }} />
                 <Typography fontSize="1.125rem" color={textColor}>
-                  {dateRange}
+                  {dateRange.firstDate} : {dateRange.lastDate}
                 </Typography>
               </Grid>
             )}
             {!isCompleted && (
               <Grid item xs={12}>
                 <RacesCardDates
-                  dateRange={dateRange}
+                  dateRange={`${dateRange.firstDate} - ${dateRange.lastDate}`}
                   timezone={timezone}
                   events={events}
-                  isUserTime={isUserTime}
                   expandedByDefault={expandedByDefault}
                 />
               </Grid>
@@ -117,36 +119,6 @@ export default function RacesCard({
             {!isCompleted && (
               <Grid item xs={12}>
                 <Typography gutterBottom>{circuit}</Typography>
-                <Box position="relative" borderRadius={2}>
-                  <Box
-                    borderRadius={2}
-                    height="100%"
-                    width="100%"
-                    sx={{
-                      backgroundImage:
-                        'linear-gradient(to right, #d5ab63 , #952626)',
-                    }}
-                    position="absolute"
-                  />
-                  <Box
-                    borderRadius={2}
-                    height="100%"
-                    width="100%"
-                    position="absolute"
-                    sx={{
-                      backgroundImage: BACKGROUND_IMG,
-                      borderRadius: 2,
-                    }}
-                  />
-                  <Image
-                    src={img}
-                    height="40px"
-                    width="100%"
-                    alt={circuit}
-                    layout="responsive"
-                    objectFit="contain"
-                  />
-                </Box>
               </Grid>
             )}
           </Grid>

@@ -1,48 +1,72 @@
 import { mainUrl } from './dbConnection';
 
-type GetDataResponse<T> = { data: T | null; errors: string | null };
-
-const makeParamsString = (params?: any) => {
-  if (params == null) return null;
-
-  const paramsString = Object.keys(params).reduce((acc, e) => {
-    const seperator = acc === '' ? '' : '&';
-    return acc + seperator + `${e}=${params[e]}`;
-  }, '');
-  return paramsString;
+type Location = {
+  lat: string;
+  long: string;
+  locality: string;
+  country: string;
 };
 
-export default async function getData<T>(
-  fakeData: any,
-  route: string,
-  params?: any
-): Promise<GetDataResponse<T>> {
-  let url = mainUrl + `/${route}`;
+type Circuit = {
+  circuitId: string;
+  url: string;
+  circuitName: string;
+  Location: Location;
+};
 
-  const paramsString = makeParamsString(params);
-  if (paramsString) {
-    url += `?${paramsString}`;
-  }
+type Session = {
+  date: string;
+  time: string;
+};
 
-  try {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-host': 'api-formula-1.p.rapidapi.com',
-        'x-rapidapi-key': '0f2fb9a6e43206a0f37c4b67ad022417', // should usually be in .env
-      },
-    });
-    const data = await res.json();
+export type RaceData = {
+  season: string;
+  round: string;
+  url: string;
+  raceName: string;
+  Circuit: Circuit;
+  date: string;
+  time: string;
+  FirstPractice: Session;
+  SecondPractice: Session;
+  ThirdPractice: Session;
+  Qualifying: Session;
+  Sprint: Session;
+  SprintQualifying: Session;
+};
 
-    if (!!data.errors && data.errors.length !== 0) {
-      return { data: null, errors: data.errors };
-    }
-    if (!data || !data.response) {
-      return { data: null, errors: 'no data returned' };
-    }
+export default async function getData() {
+  const res = await fetch(mainUrl, {
+    method: 'GET',
+  });
+  const data = await res.json();
 
-    return { data: data.response, errors: null };
-  } catch (e) {
-    return { data: null, errors: e as string };
-  }
+  const base = data.MRData;
+
+  const races: RaceData[] = base.RaceTable.Races;
+
+  const currentRaces = races.filter((e) => e.season === '2025');
+
+  const raceData = currentRaces.map((e) => ({
+    ...e,
+    events: [
+      ...(e.FirstPractice
+        ? [{ ...e.FirstPractice, type: 'First Practice' }]
+        : []),
+      ...(e.SecondPractice
+        ? [{ ...e.SecondPractice, type: 'Second Practice' }]
+        : []),
+      ...(e.ThirdPractice
+        ? [{ ...e.ThirdPractice, type: 'Third Practice' }]
+        : []),
+      ...(e.SprintQualifying
+        ? [{ ...e.SprintQualifying, type: 'Sprint Qualifying' }]
+        : []),
+      ...(e.Sprint ? [{ ...e.Sprint, type: 'Sprint' }] : []),
+      ...(e.Qualifying ? [{ ...e.Qualifying, type: 'Qualifying' }] : []),
+      { date: e.date, time: e.time, type: 'Race' },
+    ],
+  }));
+
+  return { data: raceData, errors: null };
 }

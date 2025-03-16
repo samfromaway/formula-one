@@ -1,1 +1,1 @@
-export const mainUrl = 'https://v1.formula-1.api-sports.io';
+export const mainUrl = 'https://api.jolpi.ca/ergast/f1/races?offset=1122';

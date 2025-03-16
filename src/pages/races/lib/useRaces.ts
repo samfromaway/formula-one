@@ -1,6 +1,6 @@
 import useData from '@/lib/useData';
-import getRaces, { Race } from './getRaces';
+import getRaces from './getRaces';
 
-export default function useRaces(timezone: string) {
-  return useData(() => getRaces(timezone), [timezone]);
+export default function useRaces() {
+  return useData(() => getRaces(), []);
 }

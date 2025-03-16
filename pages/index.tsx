@@ -7,16 +7,52 @@ import useRaces from '@/pages/races/lib/useRaces';
 import Head from 'next/head';
 import PageFallback from '@/components/layout/PageFallback';
 import { Spacer } from '@/components/layout';
+import { DateTime } from 'luxon';
 
 const Home: NextPage = () => {
-  const [timezone, setTimezone] = useState('Your Time');
-  const { data, errors, isLoading } = useRaces(timezone);
-
-  const isUserTime = timezone === 'Your Time';
+  const [timezone, setTimezone] = useState('Europe/Zurich');
+  const { data, errors, isLoading } = useRaces();
 
   const handleTimezoneChange = (event: SelectChangeEvent<string>) => {
     setTimezone(event.target.value);
   };
+
+  const formatTimeForTimezone = (
+    dateString: string,
+    timeString: string,
+    timezone: string
+  ) => {
+    const dateTimeString = `${dateString}T${timeString}`;
+
+    // Treat input as UTC and convert to the selected timezone
+    const dt = DateTime.fromISO(dateTimeString, { zone: 'UTC' }) // Assume input is in UTC
+      .setZone(timezone); // Luxon will automatically handle DST here
+
+    return dt.toFormat('yyyy-MM-dd HH:mm:ss');
+  };
+
+  const racesWithTimeZoneTime = data?.map((e) => ({
+    ...e,
+    events: e.events.map((event) => ({
+      ...event,
+      date: event.date,
+      time: event.time,
+      timezoneDate: formatTimeForTimezone(
+        event.date,
+        event.time,
+        timezone
+      ).split(' ')[0],
+      timezoneTime: formatTimeForTimezone(
+        event.date,
+        event.time,
+        timezone
+      ).split(' ')[1],
+    })),
+  }));
+
+  if (!racesWithTimeZoneTime) {
+    return null;
+  }
 
   return (
     <>
@@ -26,7 +62,7 @@ const Home: NextPage = () => {
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
       <Spacer space={2} />
       <PageFallback isLoading={isLoading} errors={errors}>
-        <RacesPage races={data} isUserTime={isUserTime} />
+        <RacesPage races={racesWithTimeZoneTime} timezone={timezone} />
       </PageFallback>
     </>
   );
