@@ -1,22 +1,23 @@
 import { Box, Typography, Grid } from '@mui/material';
 import { useTheme } from '@mui/system';
 import PublicIcon from '@mui/icons-material/Public';
-import { Race } from '../../lib/getRaces';
+import { Race, RaceEvent, RaceWTimezone } from '../../lib/getRaces';
 import { styled } from '@mui/material/styles';
 import RacesCardDates from './RacesCardDates';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import { Spacer } from '@/components/layout';
+import { formatDateFromISOString } from '@/utils/dates';
 
 type RacesCardProps = {
   round: string;
-  dateRange: string;
   country: string;
   circuit: string;
   timezone: string;
-  events: Race['events'];
+  events: RaceWTimezone[number]['events'];
   isNext: boolean;
   expandedByDefault?: boolean;
+  isCompleted: boolean;
 };
 
 const makeBorderGradient = (color: string) =>
@@ -39,17 +40,28 @@ const RaceCardContent = styled(Box)(({ theme }) => ({
 
 export default function RacesCard({
   round,
-  dateRange,
   country,
   circuit,
   timezone,
   events,
   isNext,
   expandedByDefault,
+  isCompleted,
 }: RacesCardProps) {
   const { palette } = useTheme();
-  const isCompleted = status === 'Completed';
   const textColor = isCompleted ? 'text.secondary' : undefined;
+
+  const makeDateRange = (raceEvents: RaceEvent[]) => {
+    const firstEvent = raceEvents[0];
+    const lastEvent = raceEvents[raceEvents.length - 1];
+
+    const firstDate = formatDateFromISOString(firstEvent.date);
+    const lastDate = formatDateFromISOString(lastEvent.date);
+
+    return { firstDate, lastDate };
+  };
+
+  const dateRange = makeDateRange(events);
 
   return (
     <RaceCard>
@@ -89,14 +101,14 @@ export default function RacesCard({
               <Grid item xs={12} display="flex" alignItems="center">
                 <AccessTimeIcon sx={{ marginRight: 2 }} />
                 <Typography fontSize="1.125rem" color={textColor}>
-                  {dateRange}
+                  {dateRange.firstDate} : {dateRange.lastDate}
                 </Typography>
               </Grid>
             )}
             {!isCompleted && (
               <Grid item xs={12}>
                 <RacesCardDates
-                  dateRange={dateRange}
+                  dateRange={`${dateRange.firstDate} - ${dateRange.lastDate}`}
                   timezone={timezone}
                   events={events}
                   expandedByDefault={expandedByDefault}

@@ -1,12 +1,13 @@
 import RacesCard from './ui/RacesCard/RacesCard';
 import Timer from './ui/Timer';
-import { Race } from './lib/getRaces';
+import { RaceWTimezone } from './lib/getRaces';
 import { Box, Typography } from '@mui/material';
 import { Spacer } from '@/components/layout';
 import { DynamicGrid } from '@/components/ui';
+import { formatDateFromISOString } from '@/utils/dates';
 
 type RacesPageProps = {
-  races: Race[] | null;
+  races: RaceWTimezone | null;
   timezone: string;
 };
 
@@ -52,11 +53,11 @@ const RacesPage = ({ races, timezone }: RacesPageProps) => {
         <RacesCard
           round={nextRace.round}
           country={nextRace.Circuit.Location.country}
-          dateRange={`${nextRace.FirstPractice.date} - ${nextRace.date}`}
           timezone={timezone}
           circuit={nextRace.Circuit.circuitName}
           events={nextRace.events}
           isNext={true}
+          isCompleted={false}
         />
       </Box>
       <Spacer space={4} />
@@ -67,18 +68,23 @@ const RacesPage = ({ races, timezone }: RacesPageProps) => {
         maxColumns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 3 }}
         fullWidth
       >
-        {races.map((e) => (
-          <RacesCard
-            key={e.round}
-            round={e.round}
-            country={e.Circuit.Location.country}
-            dateRange={`${e.FirstPractice.date} - ${e.date}`}
-            timezone={timezone}
-            circuit={e.Circuit.circuitName}
-            events={e.events}
-            isNext={nextRace?.round === e.round}
-          />
-        ))}
+        {races.map((e) => {
+          const raceEndDate = new Date(`${e.date}T${e.time}`);
+          const isCompleted = raceEndDate < new Date();
+
+          return (
+            <RacesCard
+              key={e.round}
+              round={e.round}
+              country={e.Circuit.Location.country}
+              timezone={timezone}
+              circuit={e.Circuit.circuitName}
+              events={e.events}
+              isNext={nextRace?.round === e.round}
+              isCompleted={isCompleted}
+            />
+          );
+        })}
       </DynamicGrid>
     </>
   );

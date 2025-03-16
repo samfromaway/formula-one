@@ -1,7 +1,4 @@
-import {
-  formatDateFromISOString,
-  formatTimeFromISOString,
-} from '@/utils/dates';
+import { formatDateFromISOString } from '@/utils/dates';
 import {
   Accordion,
   AccordionDetails,
@@ -11,12 +8,12 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { Race } from '../../lib/getRaces';
+import { RaceEventWTimeZone, RaceWTimezone } from '../../lib/getRaces';
 
 type RacesCardDatesProps = {
   dateRange: string;
   timezone: string;
-  events: Race['events'];
+  events: RaceEventWTimeZone[];
   expandedByDefault?: boolean;
 };
 
@@ -61,10 +58,9 @@ const RacesCardDates = ({
               </Grid>
               <Grid item xs={7}>
                 <Typography>
-                  {e.date} - {e.time}
-                  {/* {formatDateFromISOString(e.date, isUserTime)}
+                  {formatDateFromISOString(e.timezoneDate)}
                   {' - '}
-                  {formatTimeFromISOString(e.date, isUserTime)} */}
+                  {e.timezoneTime?.split(':').slice(0, 2).join(':')}
                 </Typography>
               </Grid>
             </Grid>

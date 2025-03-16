@@ -51,16 +51,16 @@ export default async function getData() {
     ...e,
     events: [
       ...(e.FirstPractice
-        ? [{ ...e.FirstPractice, type: 'FirstPractice' }]
+        ? [{ ...e.FirstPractice, type: 'First Practice' }]
         : []),
       ...(e.SecondPractice
-        ? [{ ...e.SecondPractice, type: 'SecondPractice' }]
+        ? [{ ...e.SecondPractice, type: 'Second Practice' }]
         : []),
       ...(e.ThirdPractice
-        ? [{ ...e.ThirdPractice, type: 'ThirdPractice' }]
+        ? [{ ...e.ThirdPractice, type: 'Third Practice' }]
         : []),
       ...(e.SprintQualifying
-        ? [{ ...e.SprintQualifying, type: 'SprintQualifying' }]
+        ? [{ ...e.SprintQualifying, type: 'Sprint Qualifying' }]
         : []),
       ...(e.Sprint ? [{ ...e.Sprint, type: 'Sprint' }] : []),
       ...(e.Qualifying ? [{ ...e.Qualifying, type: 'Qualifying' }] : []),

@@ -5,34 +5,14 @@ import isPast from 'date-fns/isPast';
 const DEFAULT_DATE_FORMAT = 'dd MMM';
 const DEFAULT_TIME_FORMAT = 'haaa';
 
-const makeUnconvertedDateFromISOString = (dateString: string) => {
-  return parseISO(dateString.slice(0, 19));
-};
-
-export function formatDate(
-  dateString: string,
-  isUserTime: boolean,
-  dateFormat: string
-) {
-  const date = isUserTime
-    ? parseISO(dateString)
-    : makeUnconvertedDateFromISOString(dateString);
+export function formatDate(dateString: string, dateFormat: string) {
+  const date = parseISO(dateString);
 
   return format(date, dateFormat);
 }
 
-export function formatDateFromISOString(
-  dateString: string,
-  isUserTime: boolean
-) {
-  return formatDate(dateString, isUserTime, DEFAULT_DATE_FORMAT);
-}
-
-export function formatTimeFromISOString(
-  dateString: string,
-  isUserTime: boolean
-) {
-  return formatDate(dateString, isUserTime, DEFAULT_TIME_FORMAT);
+export function formatDateFromISOString(dateString: string) {
+  return formatDate(dateString, DEFAULT_DATE_FORMAT);
 }
 
 export function dateStringHasPassed(dateString: string) {
