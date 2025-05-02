@@ -12,7 +12,7 @@ npm i
 yarn
 ```
 
-4. You can run dev server with the following command:
+4. You can run dev server with the following command
 
 ```bash
 npm run dev
