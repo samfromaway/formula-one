@@ -1,10 +1,10 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client';
 import { useState, useEffect } from 'react';
-import { RacesPage } from '@/pages';
+import { RacesPage } from '@/sections';
 import { SelectChangeEvent } from '@mui/material';
-import TimezoneSelect from '@/pages/races/ui/TimezoneSelect';
-import useRaces from '@/pages/races/lib/useRaces';
+import TimezoneSelect from '@/sections/races/ui/TimezoneSelect';
+import useRaces from '@/sections/races/lib/useRaces';
 import Head from 'next/head';
 import PageFallback from '@/components/layout/PageFallback';
 import { Spacer } from '@/components/layout';
