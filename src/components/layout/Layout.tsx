@@ -26,7 +26,6 @@ export default function Layout({ children, toggleDarkMode }: LayoutProps) {
     };
   return (
     <>
-      {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
       <CssBaseline />
       <AppBar toggleDrawer={toggleDrawer} toggleDarkMode={toggleDarkMode} />
       <Drawer toggleDrawer={toggleDrawer} isOpen={isDrawerOpen} />
