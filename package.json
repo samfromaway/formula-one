@@ -12,6 +12,7 @@
     "@fontsource/titillium-web": "^4.5.8",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^5.17.1",
+    "@mui/material-nextjs": "^7.0.2",
     "@next/bundle-analyzer": "15.3.1",
     "date-fns": "^2.28.0",
     "luxon": "^3.5.0",
