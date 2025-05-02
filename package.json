@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -14,20 +14,23 @@
     "@fontsource/titillium-web": "^4.5.8",
     "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.7.0",
-    "@next/bundle-analyzer": "^12.1.6",
+    "@next/bundle-analyzer": "15.3.1",
     "date-fns": "^2.28.0",
     "luxon": "^3.5.0",
-    "next": "^12.1.6",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "next": "15.3.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@types/luxon": "^3.4.2",
     "@types/node": "latest",
-    "@types/react": "latest",
+    "@types/react": "19.1.2",
     "eslint": "latest",
-    "eslint-config-next": "latest",
+    "eslint-config-next": "15.3.1",
     "eslint-config-prettier": "^8.5.0",
     "typescript": "latest"
+  },
+  "overrides": {
+    "@types/react": "19.1.2"
   }
 }

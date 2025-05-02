@@ -4,7 +4,6 @@ import { RaceWTimezone } from './lib/getRaces';
 import { Box, Typography } from '@mui/material';
 import { Spacer } from '@/components/layout';
 import { DynamicGrid } from '@/components/ui';
-import { formatDateFromISOString } from '@/utils/dates';
 
 type RacesPageProps = {
   races: RaceWTimezone | null;
