@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { RacesPage } from '@/sections';
-import { Box, SelectChangeEvent } from '@mui/material';
+import { Box, Button, SelectChangeEvent, TextField } from '@mui/material';
 import TimezoneSelect from '@/sections/races/ui/TimezoneSelect';
 import useRaces from '@/sections/races/lib/useRaces';
 import Head from 'next/head';
@@ -83,14 +83,14 @@ function PushNotificationManager() {
       {subscription ? (
         <>
           <p>You are subscribed to push notifications.</p>
-          <button onClick={unsubscribeFromPush}>Unsubscribe</button>
-          <input
+          <Button onClick={unsubscribeFromPush}>Unsubscribe</Button>
+          <TextField
             type="text"
             placeholder="Enter notification message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />
-          <button onClick={sendTestNotification}>Send Test</button>
+          <Button onClick={sendTestNotification}>Send Test</Button>
         </>
       ) : (
         <>
