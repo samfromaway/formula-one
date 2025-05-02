@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { RacesPage } from '@/sections';
-import { SelectChangeEvent } from '@mui/material';
+import { Box, SelectChangeEvent } from '@mui/material';
 import TimezoneSelect from '@/sections/races/ui/TimezoneSelect';
 import useRaces from '@/sections/races/lib/useRaces';
 import Head from 'next/head';
@@ -193,6 +193,7 @@ const Page = () => {
       </Head>
       <PushNotificationManager />
       <InstallPrompt />
+      <Box p={4} />
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
       <Spacer space={2} />
       <PageFallback isLoading={isLoading} errors={errors}>
