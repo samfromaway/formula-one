@@ -16,14 +16,18 @@
     "@next/bundle-analyzer": "15.3.1",
     "date-fns": "^2.28.0",
     "luxon": "^3.5.0",
+    "net": "^1.0.2",
     "next": "15.3.1",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "tls": "^0.0.1",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/luxon": "^3.4.2",
     "@types/node": "latest",
     "@types/react": "19.1.2",
+    "@types/web-push": "^3.6.4",
     "eslint": "latest",
     "eslint-config-next": "15.3.1",
     "eslint-config-prettier": "^8.5.0",
