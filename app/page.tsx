@@ -95,7 +95,7 @@ function PushNotificationManager() {
       ) : (
         <>
           <p>You are not subscribed to push notifications.</p>
-          <button onClick={subscribeToPush}>Subscribe</button>
+          <Button onClick={subscribeToPush}>Subscribe</Button>
         </>
       )}
     </div>
