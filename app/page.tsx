@@ -1,4 +1,4 @@
-import type { NextPage } from 'next';
+'use client';
 import { useState } from 'react';
 import { RacesPage } from '@/pages';
 import { SelectChangeEvent } from '@mui/material';
@@ -9,7 +9,7 @@ import PageFallback from '@/components/layout/PageFallback';
 import { Spacer } from '@/components/layout';
 import { DateTime } from 'luxon';
 
-const Home = () => {
+const Page = () => {
   const [timezone, setTimezone] = useState('Europe/Zurich');
   const { data, errors, isLoading } = useRaces();
 
@@ -68,4 +68,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Page;

@@ -1,3 +1,5 @@
+'use client';
+
 import Head from 'next/head';
 import { AppProps } from 'next/app';
 import { ThemeProvider } from '@mui/material/styles';
@@ -5,7 +7,7 @@ import { CacheProvider, EmotionCache } from '@emotion/react';
 import { darkTheme, lightTheme } from '@/styles/theme';
 import createEmotionCache from '@/styles/createEmotionCache';
 import { useMemo } from 'react';
-import { Layout } from '@/components/layout';
+import { Layout as LayoutComponent } from '@/components/layout';
 import '@fontsource/titillium-web/600.css';
 import '@fontsource/titillium-web/700.css';
 import useDarkMode from '@/utils/useDarkMode';
@@ -17,7 +19,7 @@ interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache;
 }
 
-export default function MyApp(props: MyAppProps) {
+export default function Layout(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -33,9 +35,9 @@ export default function MyApp(props: MyAppProps) {
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
       <ThemeProvider theme={currentTheme}>
-        <Layout toggleDarkMode={toggleDarkMode}>
+        <LayoutComponent toggleDarkMode={toggleDarkMode}>
           <Component {...pageProps} />
-        </Layout>
+        </LayoutComponent>
       </ThemeProvider>
     </CacheProvider>
   );
