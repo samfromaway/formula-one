@@ -80,7 +80,7 @@ function PushNotificationManager() {
   }, [subscription, message]); // Dependencies: if these change, sendTestNotification is re-memoized.
 
   useEffect(() => {
-    let timerId: unknown; // To store the timeout ID for cleanup
+    let timerId: any; // To store the timeout ID for cleanup
 
     const scheduleNotification = () => {
       const now = new Date();
@@ -88,8 +88,8 @@ function PushNotificationManager() {
         now.getFullYear(),
         now.getMonth(),
         now.getDate(),
-        8,
-        59,
+        9,
+        1,
         0,
         0
       );
