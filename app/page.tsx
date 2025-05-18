@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RacesPage } from '@/sections';
 import { Box, Button, SelectChangeEvent, TextField } from '@mui/material';
 import TimezoneSelect from '@/sections/races/ui/TimezoneSelect';
@@ -66,12 +66,74 @@ function PushNotificationManager() {
     await unsubscribeUser();
   }
 
-  async function sendTestNotification() {
+  const sendTestNotification = useCallback(async () => {
     if (subscription) {
+      // The 'message' state at the time of execution will be used.
+      // If 'message' is updated after the timeout is set, this function,
+      // when called by setTimeout, will use the 'message' value from the render
+      // in which this useCallback was last created (due to its dependencies).
       await sendNotification(message);
-      setMessage('');
+      // Optionally, clear or change the message after sending
+      // setMessage(''); // Example: clear message after sending
+      console.log(`Notification sent with message: "${message}"`);
+    } else {
+      console.log('No subscription active. Notification not sent.');
     }
-  }
+  }, [subscription, message]); // Dependencies: if these change, sendTestNotification is re-memoized.
+
+  useEffect(() => {
+    let timerId; // To store the timeout ID for cleanup
+
+    const scheduleNotification = () => {
+      const now = new Date();
+      let notificationTime = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        8,
+        59,
+        0,
+        0
+      );
+
+      // If 8:45 AM today has already passed, schedule it for 8:45 AM tomorrow
+      if (now.getTime() >= notificationTime.getTime()) {
+        notificationTime.setDate(notificationTime.getDate() + 1);
+        // Ensure the time is still 8:45 AM for the next day
+        notificationTime.setHours(8, 45, 0, 0);
+      }
+
+      const delay = notificationTime.getTime() - now.getTime();
+
+      if (delay > 0) {
+        console.log(
+          `Notification scheduled for: ${notificationTime.toLocaleString()}`
+        );
+        timerId = setTimeout(() => {
+          console.log("It's 8:45 AM. Triggering notification...");
+          sendTestNotification();
+
+          // If you want the notification to repeat daily, you would need to
+          // reschedule it here for the next day (e.g., another setTimeout for 24 hours).
+          // For a one-time scheduled notification (per component mount), this is sufficient.
+        }, delay);
+      } else {
+        // This should ideally not happen with the above logic
+        console.error(
+          'Calculated delay is not positive. Notification not scheduled.'
+        );
+      }
+    };
+
+    scheduleNotification();
+
+    return () => {
+      if (timerId) {
+        clearTimeout(timerId);
+        console.log('Scheduled 8:45 AM notification has been cleared.');
+      }
+    };
+  }, [sendTestNotification]);
 
   if (!isSupported) {
     return <p>Push notifications are not supported in this browser.</p>;
