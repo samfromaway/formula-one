@@ -75,14 +75,12 @@ function PushNotificationManager() {
       await sendNotification(message);
       // Optionally, clear or change the message after sending
       // setMessage(''); // Example: clear message after sending
-      console.log(`Notification sent with message: "${message}"`);
     } else {
-      console.log('No subscription active. Notification not sent.');
     }
   }, [subscription, message]); // Dependencies: if these change, sendTestNotification is re-memoized.
 
   useEffect(() => {
-    let timerId; // To store the timeout ID for cleanup
+    let timerId: unknown; // To store the timeout ID for cleanup
 
     const scheduleNotification = () => {
       const now = new Date();
@@ -106,11 +104,7 @@ function PushNotificationManager() {
       const delay = notificationTime.getTime() - now.getTime();
 
       if (delay > 0) {
-        console.log(
-          `Notification scheduled for: ${notificationTime.toLocaleString()}`
-        );
         timerId = setTimeout(() => {
-          console.log("It's 8:45 AM. Triggering notification...");
           sendTestNotification();
 
           // If you want the notification to repeat daily, you would need to
@@ -119,9 +113,6 @@ function PushNotificationManager() {
         }, delay);
       } else {
         // This should ideally not happen with the above logic
-        console.error(
-          'Calculated delay is not positive. Notification not scheduled.'
-        );
       }
     };
 
@@ -130,7 +121,6 @@ function PushNotificationManager() {
     return () => {
       if (timerId) {
         clearTimeout(timerId);
-        console.log('Scheduled 8:45 AM notification has been cleared.');
       }
     };
   }, [sendTestNotification]);
