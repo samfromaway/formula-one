@@ -8,6 +8,25 @@ const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
   token: process.env.KV_REST_API_TOKEN!,
 });
+// #region agent log
+fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    location: 'actions.ts:7',
+    message: 'Redis instance created',
+    data: {
+      hasUrl: !!process.env.KV_REST_API_URL,
+      hasToken: !!process.env.KV_REST_API_TOKEN,
+      urlLength: process.env.KV_REST_API_URL?.length || 0,
+    },
+    timestamp: Date.now(),
+    sessionId: 'debug-session',
+    runId: 'run1',
+    hypothesisId: 'D',
+  }),
+}).catch(() => {});
+// #endregion
 
 webpush.setVapidDetails(
   'https://formula-one-psi.vercel.app',
@@ -21,42 +40,157 @@ function getSubscriptionKey(sub: PushSubscription): string {
 }
 
 export async function subscribeUser(sub: PushSubscription) {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      location: 'actions.ts:23',
+      message: 'subscribeUser entry',
+      data: {
+        endpoint: sub.endpoint,
+        hasKeys: !!sub.keys,
+        keysPresent: sub.keys ? Object.keys(sub.keys) : [],
+      },
+      timestamp: Date.now(),
+      sessionId: 'debug-session',
+      runId: 'run1',
+      hypothesisId: 'A,B,C',
+    }),
+  }).catch(() => {});
+  // #endregion
   try {
     const key = getSubscriptionKey(sub);
 
     // Validate subscription has required fields
     if (!sub.endpoint) {
+      // #region agent log
+      fetch(
+        'http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'actions.ts:30',
+            message: 'validation failed - missing endpoint',
+            data: {},
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'C',
+          }),
+        }
+      ).catch(() => {});
+      // #endregion
       return { success: false, error: 'Subscription missing endpoint' };
     }
     if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+      // #region agent log
+      fetch(
+        'http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'actions.ts:33',
+            message: 'validation failed - missing keys',
+            data: {
+              hasKeys: !!sub.keys,
+              hasP256dh: !!sub.keys?.p256dh,
+              hasAuth: !!sub.keys?.auth,
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'C',
+          }),
+        }
+      ).catch(() => {});
+      // #endregion
       return { success: false, error: 'Subscription missing keys' };
     }
 
     // Serialize the subscription
     const serialized = JSON.stringify(sub);
-
-    // eslint-disable-next-line no-console
-    console.log('Storing subscription:', {
-      key,
-      endpoint: sub.endpoint,
-      hasKeys: !!sub.keys,
-      serializedLength: serialized.length,
-    });
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'actions.ts:36',
+        message: 'before redis.set',
+        data: {
+          key,
+          serializedLength: serialized.length,
+          serializedPreview: serialized.substring(0, 200),
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'A,C',
+      }),
+    }).catch(() => {});
+    // #endregion
 
     // Store the subscription data first
     const setResult = await redis.set(key, serialized);
-
-    // eslint-disable-next-line no-console
-    console.log('Redis set result:', setResult);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'actions.ts:47',
+        message: 'after redis.set',
+        data: { key, setResult, setResultType: typeof setResult },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'A',
+      }),
+    }).catch(() => {});
+    // #endregion
 
     // Verify it was stored immediately
     const verifyData = await redis.get<string>(key);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'actions.ts:53',
+        message: 'after redis.get verification',
+        data: {
+          key,
+          verifyDataFound: !!verifyData,
+          verifyDataLength: verifyData?.length || 0,
+          matches: verifyData === serialized,
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'A,E',
+      }),
+    }).catch(() => {});
+    // #endregion
     if (!verifyData) {
-      // eslint-disable-next-line no-console
-      console.error(
-        'Failed to verify subscription storage - data not found after set',
-        { key, setResult }
-      );
+      // #region agent log
+      fetch(
+        'http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'actions.ts:54',
+            message: 'verification failed - data not found',
+            data: { key, setResult },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'A',
+          }),
+        }
+      ).catch(() => {});
+      // #endregion
       return {
         success: false,
         error: 'Failed to store subscription - verification failed',
@@ -64,20 +198,64 @@ export async function subscribeUser(sub: PushSubscription) {
       };
     }
 
-    // eslint-disable-next-line no-console
-    console.log('Verification successful, data length:', verifyData.length);
-
     // Also maintain a set of all subscription keys for easy retrieval
     const saddResult = await redis.sadd('subscriptions:all', key);
-
-    // eslint-disable-next-line no-console
-    console.log('Added to set, result:', saddResult);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'actions.ts:71',
+        message: 'after redis.sadd',
+        data: { key, saddResult },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'B',
+      }),
+    }).catch(() => {});
+    // #endregion
 
     // Verify again after adding to set
     const verifyAfterSet = await redis.get<string>(key);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'actions.ts:77',
+        message: 'after redis.sadd verification',
+        data: {
+          key,
+          verifyAfterSetFound: !!verifyAfterSet,
+          verifyAfterSetLength: verifyAfterSet?.length || 0,
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'B',
+      }),
+    }).catch(() => {});
+    // #endregion
     if (!verifyAfterSet) {
-      // eslint-disable-next-line no-console
-      console.error('Data disappeared after adding to set!', { key });
+      // #region agent log
+      fetch(
+        'http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'actions.ts:78',
+            message: 'data disappeared after sadd',
+            data: { key, setResult, saddResult },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'B',
+          }),
+        }
+      ).catch(() => {});
+      // #endregion
       return {
         success: false,
         error: 'Data lost after adding to set',
@@ -85,10 +263,41 @@ export async function subscribeUser(sub: PushSubscription) {
       };
     }
 
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'actions.ts:88',
+        message: 'subscribeUser success',
+        data: { key },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'A,B,C',
+      }),
+    }).catch(() => {});
+    // #endregion
     return { success: true };
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error storing subscription:', error);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'actions.ts:90',
+        message: 'subscribeUser error',
+        data: {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'A,C',
+      }),
+    }).catch(() => {});
+    // #endregion
     return {
       success: false,
       error: 'Failed to store subscription',

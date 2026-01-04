@@ -6,6 +6,25 @@ const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
   token: process.env.KV_REST_API_TOKEN!,
 });
+// #region agent log
+fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    location: 'debug-subscriptions/route.ts:5',
+    message: 'Debug endpoint Redis instance created',
+    data: {
+      hasUrl: !!process.env.KV_REST_API_URL,
+      hasToken: !!process.env.KV_REST_API_TOKEN,
+      urlLength: process.env.KV_REST_API_URL?.length || 0,
+    },
+    timestamp: Date.now(),
+    sessionId: 'debug-session',
+    runId: 'run1',
+    hypothesisId: 'D',
+  }),
+}).catch(() => {});
+// #endregion
 
 // Debug endpoint to check subscription storage
 export async function GET(request: NextRequest) {
@@ -15,15 +34,66 @@ export async function GET(request: NextRequest) {
 
     // Get all keys in the subscriptions:all set
     const setKeys = await redis.smembers('subscriptions:all');
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'debug-subscriptions/route.ts:20',
+        message: 'got set keys',
+        data: {
+          setKeysCount: Array.isArray(setKeys) ? setKeys.length : 0,
+          setKeys: Array.isArray(setKeys) ? setKeys : [],
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'D',
+      }),
+    }).catch(() => {});
+    // #endregion
 
     // Get subscriptions using the action function
     const subscriptionsFromAction = await getAllSubscriptions();
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'debug-subscriptions/route.ts:23',
+        message: 'got subscriptions from action',
+        data: { count: subscriptionsFromAction.length },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'D',
+      }),
+    }).catch(() => {});
+    // #endregion
 
     // Try to get subscriptions directly
     const directSubscriptions: any[] = [];
     if (Array.isArray(setKeys) && setKeys.length > 0) {
       for (const key of setKeys as string[]) {
         const subData = await redis.get<string>(key);
+        // #region agent log
+        fetch(
+          'http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'debug-subscriptions/route.ts:29',
+              message: 'trying to get key from redis',
+              data: { key, found: !!subData, dataLength: subData?.length || 0 },
+              timestamp: Date.now(),
+              sessionId: 'debug-session',
+              runId: 'run1',
+              hypothesisId: 'A,D',
+            }),
+          }
+        ).catch(() => {});
+        // #endregion
         if (subData) {
           try {
             directSubscriptions.push({
