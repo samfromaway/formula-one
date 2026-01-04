@@ -141,7 +141,7 @@ export async function subscribeUser(sub: PushSubscription) {
       serializedPreview: serialized.substring(0, 100),
       endpoint: sub.endpoint,
     });
-    
+
     let setResult;
     try {
       setResult = await redis.set(key, serialized);
