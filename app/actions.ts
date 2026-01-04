@@ -187,8 +187,12 @@ export async function subscribeUser(sub: PushSubscription) {
     console.log('[subscribeUser] AFTER redis.get verification:', {
       key,
       verifyDataFound: !!verifyData,
+      verifyDataType: typeof verifyData,
+      verifyDataValue: verifyData,
       verifyDataLength: verifyData?.length || 0,
       verifyDataMatches: verifyData === serialized,
+      serializedLength: serialized.length,
+      serializedType: typeof serialized,
     });
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
@@ -210,7 +214,11 @@ export async function subscribeUser(sub: PushSubscription) {
       }),
     }).catch(() => {});
     // #endregion
-    if (!verifyData) {
+    // Check if data is missing or empty
+    if (
+      !verifyData ||
+      (typeof verifyData === 'string' && verifyData.length === 0)
+    ) {
       // #region agent log
       fetch(
         'http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172',
@@ -218,9 +226,14 @@ export async function subscribeUser(sub: PushSubscription) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            location: 'actions.ts:54',
-            message: 'verification failed - data not found',
-            data: { key, setResult },
+            location: 'actions.ts:217',
+            message: 'verification failed - data not found or empty',
+            data: {
+              key,
+              setResult,
+              verifyData,
+              verifyDataType: typeof verifyData,
+            },
             timestamp: Date.now(),
             sessionId: 'debug-session',
             runId: 'run1',
@@ -229,10 +242,28 @@ export async function subscribeUser(sub: PushSubscription) {
         }
       ).catch(() => {});
       // #endregion
+      // eslint-disable-next-line no-console
+      console.error(
+        '[subscribeUser] Verification failed - data empty or missing:',
+        {
+          key,
+          setResult,
+          verifyData,
+          verifyDataType: typeof verifyData,
+          verifyDataLength: verifyData?.length || 0,
+          serializedLength: serialized.length,
+        }
+      );
       return {
         success: false,
-        error: 'Failed to store subscription - verification failed',
-        debug: { key, setResult, verifyData: null },
+        error:
+          'Failed to store subscription - verification failed (data empty)',
+        debug: {
+          key,
+          setResult,
+          verifyData,
+          verifyDataType: typeof verifyData,
+        },
       };
     }
 
