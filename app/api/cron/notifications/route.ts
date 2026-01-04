@@ -91,10 +91,14 @@ export async function GET(request: NextRequest) {
     }
 
     const now = new Date();
+    // Check for events starting within the next 24 hours
+    // Note: On Hobby plan, cron runs once per day. Upgrade to Pro for 15-minute intervals.
+    const twentyFourHoursFromNow = new Date(
+      now.getTime() + 24 * 60 * 60 * 1000
+    );
     const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
-    const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000);
 
-    // Find events starting within the next hour (and not in the past 15 minutes to avoid duplicates)
+    // Find events starting within the next 24 hours (but prioritize those within 1 hour)
     const upcomingEvents: Array<{
       raceName: string;
       eventType: string;
@@ -113,12 +117,9 @@ export async function GET(request: NextRequest) {
         // Parse event date/time as UTC (API returns UTC times)
         const eventDateTime = new Date(`${event.date}T${event.time}Z`);
 
-        // Check if event is between 15 minutes ago and 1 hour from now
-        // This accounts for the cron running every 15 minutes
-        if (
-          eventDateTime >= fifteenMinutesAgo &&
-          eventDateTime <= oneHourFromNow
-        ) {
+        // Check if event is within the next 24 hours
+        // For better timing, upgrade to Pro plan to run every 15 minutes
+        if (eventDateTime > now && eventDateTime <= twentyFourHoursFromNow) {
           upcomingEvents.push({
             raceName: race.raceName,
             eventType: event.type,
@@ -133,7 +134,7 @@ export async function GET(request: NextRequest) {
     if (upcomingEvents.length === 0) {
       return NextResponse.json({
         success: true,
-        message: 'No events starting within the next hour',
+        message: 'No events starting within the next 24 hours',
         eventsChecked: 0,
       });
     }
@@ -192,12 +193,21 @@ export async function GET(request: NextRequest) {
       const minutesUntilEvent = Math.round(
         (event.eventDate.getTime() - now.getTime()) / (1000 * 60)
       );
-      const timeText =
-        minutesUntilEvent <= 0
-          ? 'starting now'
-          : `in ${minutesUntilEvent} minute${
-              minutesUntilEvent !== 1 ? 's' : ''
-            }`;
+      const hoursUntilEvent = Math.floor(minutesUntilEvent / 60);
+      const remainingMinutes = minutesUntilEvent % 60;
+      
+      let timeText: string;
+      if (minutesUntilEvent <= 0) {
+        timeText = 'starting now';
+      } else if (hoursUntilEvent >= 1) {
+        if (remainingMinutes === 0) {
+          timeText = `in ${hoursUntilEvent} hour${hoursUntilEvent !== 1 ? 's' : ''}`;
+        } else {
+          timeText = `in ${hoursUntilEvent} hour${hoursUntilEvent !== 1 ? 's' : ''} and ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`;
+        }
+      } else {
+        timeText = `in ${minutesUntilEvent} minute${minutesUntilEvent !== 1 ? 's' : ''}`;
+      }
 
       const title = `${event.raceName} - ${event.eventType}`;
       const body = `Starts ${timeText}`;
