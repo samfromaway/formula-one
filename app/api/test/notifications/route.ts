@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { Redis } from '@upstash/redis';
-import { getAllSubscriptions } from '@/app/actions';
+import { getAllSubscriptions } from '../../../actions';
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
