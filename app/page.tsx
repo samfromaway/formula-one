@@ -61,23 +61,20 @@ function PushNotificationManager() {
   }
 
   async function unsubscribeFromPush() {
-    await subscription?.unsubscribe();
+    if (subscription) {
+      await subscription.unsubscribe();
+      const serializedSub = JSON.parse(JSON.stringify(subscription));
+      await unsubscribeUser(serializedSub);
+    }
     setSubscription(null);
-    await unsubscribeUser();
   }
 
   const sendTestNotification = useCallback(async () => {
     if (subscription) {
-      // The 'message' state at the time of execution will be used.
-      // If 'message' is updated after the timeout is set, this function,
-      // when called by setTimeout, will use the 'message' value from the render
-      // in which this useCallback was last created (due to its dependencies).
-      await sendNotification(message);
-      // Optionally, clear or change the message after sending
-      // setMessage(''); // Example: clear message after sending
-    } else {
+      const serializedSub = JSON.parse(JSON.stringify(subscription));
+      await sendNotification(serializedSub, message);
     }
-  }, [subscription, message]); // Dependencies: if these change, sendTestNotification is re-memoized.
+  }, [subscription, message]);
 
   useEffect(() => {
     let timerId: any; // To store the timeout ID for cleanup
