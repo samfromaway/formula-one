@@ -134,13 +134,33 @@ export async function subscribeUser(sub: PushSubscription) {
 
     // Store the subscription data first
     // Note: Upstash Redis set() returns 'OK' on success
-    const setResult = await redis.set(key, serialized);
+    // eslint-disable-next-line no-console
+    console.log('[subscribeUser] BEFORE redis.set:', {
+      key,
+      serializedLength: serialized.length,
+      serializedPreview: serialized.substring(0, 100),
+      endpoint: sub.endpoint,
+    });
+    
+    let setResult;
+    try {
+      setResult = await redis.set(key, serialized);
+    } catch (setError) {
+      // eslint-disable-next-line no-console
+      console.error('[subscribeUser] redis.set ERROR:', {
+        key,
+        error: setError instanceof Error ? setError.message : String(setError),
+        stack: setError instanceof Error ? setError.stack : undefined,
+      });
+      throw setError;
+    }
 
     // eslint-disable-next-line no-console
-    console.log('[subscribeUser] Redis set result:', {
+    console.log('[subscribeUser] AFTER redis.set:', {
       key,
       setResult,
       setResultType: typeof setResult,
+      setResultIsOK: setResult === 'OK',
       serializedLength: serialized.length,
     });
     // #region agent log
@@ -160,7 +180,16 @@ export async function subscribeUser(sub: PushSubscription) {
     // #endregion
 
     // Verify it was stored immediately
+    // eslint-disable-next-line no-console
+    console.log('[subscribeUser] BEFORE redis.get verification:', { key });
     const verifyData = await redis.get<string>(key);
+    // eslint-disable-next-line no-console
+    console.log('[subscribeUser] AFTER redis.get verification:', {
+      key,
+      verifyDataFound: !!verifyData,
+      verifyDataLength: verifyData?.length || 0,
+      verifyDataMatches: verifyData === serialized,
+    });
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
       method: 'POST',
@@ -208,7 +237,11 @@ export async function subscribeUser(sub: PushSubscription) {
     }
 
     // Also maintain a set of all subscription keys for easy retrieval
+    // eslint-disable-next-line no-console
+    console.log('[subscribeUser] BEFORE redis.sadd:', { key });
     const saddResult = await redis.sadd('subscriptions:all', key);
+    // eslint-disable-next-line no-console
+    console.log('[subscribeUser] AFTER redis.sadd:', { key, saddResult });
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
       method: 'POST',
@@ -226,7 +259,15 @@ export async function subscribeUser(sub: PushSubscription) {
     // #endregion
 
     // Verify again after adding to set
+    // eslint-disable-next-line no-console
+    console.log('[subscribeUser] BEFORE final verification:', { key });
     const verifyAfterSet = await redis.get<string>(key);
+    // eslint-disable-next-line no-console
+    console.log('[subscribeUser] AFTER final verification:', {
+      key,
+      verifyAfterSetFound: !!verifyAfterSet,
+      verifyAfterSetLength: verifyAfterSet?.length || 0,
+    });
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
       method: 'POST',
