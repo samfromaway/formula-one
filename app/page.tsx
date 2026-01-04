@@ -61,7 +61,7 @@ const Page = () => {
       <Head>
         <title>Formula 1: Races</title>
       </Head>
-      <Box p={4} />
+      <Box pb={3} />
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
       <Spacer space={2} />
       <PageFallback isLoading={isLoading} errors={errors}>
