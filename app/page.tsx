@@ -78,6 +78,7 @@ function PushNotificationManager() {
     const serializedSub = serializeSubscription(sub);
     const result = await subscribeUser(serializedSub);
     if (!result.success) {
+      // eslint-disable-next-line no-console
       console.error('Failed to subscribe:', result.error);
     }
   }

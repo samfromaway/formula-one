@@ -12,13 +12,13 @@ export async function GET(request: NextRequest) {
   try {
     // Check Redis connection
     const pingResult = await redis.ping();
-    
+
     // Get all keys in the subscriptions:all set
     const setKeys = await redis.smembers('subscriptions:all');
-    
+
     // Get subscriptions using the action function
     const subscriptionsFromAction = await getAllSubscriptions();
-    
+
     // Try to get subscriptions directly
     const directSubscriptions: any[] = [];
     if (Array.isArray(setKeys) && setKeys.length > 0) {
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         }
       }
     }
-    
+
     return NextResponse.json({
       redis: {
         ping: pingResult,
@@ -81,4 +81,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
