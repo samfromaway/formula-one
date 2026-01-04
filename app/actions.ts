@@ -133,7 +133,16 @@ export async function subscribeUser(sub: PushSubscription) {
     // #endregion
 
     // Store the subscription data first
+    // Note: Upstash Redis set() returns 'OK' on success
     const setResult = await redis.set(key, serialized);
+
+    // eslint-disable-next-line no-console
+    console.log('[subscribeUser] Redis set result:', {
+      key,
+      setResult,
+      setResultType: typeof setResult,
+      serializedLength: serialized.length,
+    });
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
       method: 'POST',
