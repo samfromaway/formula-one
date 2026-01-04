@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
 import { getAllSubscriptions } from '../../../actions';
+import type { PushSubscription } from '@/types/push-subscription';
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
@@ -75,7 +76,8 @@ export async function GET(request: NextRequest) {
     const directSubscriptions: any[] = [];
     if (Array.isArray(setKeys) && setKeys.length > 0) {
       for (const key of setKeys as string[]) {
-        const subData = await redis.get<string>(key);
+        // Upstash Redis auto-deserializes JSON, so get as object directly
+        const subData = await redis.get<PushSubscription>(key);
         // #region agent log
         fetch(
           'http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172',
@@ -85,7 +87,7 @@ export async function GET(request: NextRequest) {
             body: JSON.stringify({
               location: 'debug-subscriptions/route.ts:29',
               message: 'trying to get key from redis',
-              data: { key, found: !!subData, dataLength: subData?.length || 0 },
+              data: { key, found: !!subData, hasEndpoint: !!subData?.endpoint },
               timestamp: Date.now(),
               sessionId: 'debug-session',
               runId: 'run1',
@@ -96,16 +98,15 @@ export async function GET(request: NextRequest) {
         // #endregion
         if (subData) {
           try {
+            // Data is already parsed by Upstash Redis
             directSubscriptions.push({
               key,
-              data: JSON.parse(subData),
-              raw: subData.substring(0, 100) + '...',
+              data: subData,
             });
           } catch (e) {
             directSubscriptions.push({
               key,
               error: String(e),
-              raw: subData.substring(0, 100) + '...',
             });
           }
         } else {

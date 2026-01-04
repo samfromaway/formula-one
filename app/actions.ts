@@ -110,41 +110,18 @@ export async function subscribeUser(sub: PushSubscription) {
       return { success: false, error: 'Subscription missing keys' };
     }
 
-    // Serialize the subscription
-    const serialized = JSON.stringify(sub);
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'actions.ts:36',
-        message: 'before redis.set',
-        data: {
-          key,
-          serializedLength: serialized.length,
-          serializedPreview: serialized.substring(0, 200),
-        },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'run1',
-        hypothesisId: 'A,C',
-      }),
-    }).catch(() => {});
-    // #endregion
-
-    // Store the subscription data first
-    // Note: Upstash Redis set() returns 'OK' on success
+    // Store the subscription data directly (Upstash Redis auto-serializes/deserializes JSON)
     // eslint-disable-next-line no-console
     console.log('[subscribeUser] BEFORE redis.set:', {
       key,
-      serializedLength: serialized.length,
-      serializedPreview: serialized.substring(0, 100),
       endpoint: sub.endpoint,
+      hasKeys: !!sub.keys,
     });
 
     let setResult;
     try {
-      setResult = await redis.set(key, serialized);
+      // Store the object directly - Upstash Redis will serialize it
+      setResult = await redis.set(key, sub);
     } catch (setError) {
       // eslint-disable-next-line no-console
       console.error('[subscribeUser] redis.set ERROR:', {
@@ -161,63 +138,29 @@ export async function subscribeUser(sub: PushSubscription) {
       setResult,
       setResultType: typeof setResult,
       setResultIsOK: setResult === 'OK',
-      serializedLength: serialized.length,
     });
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'actions.ts:47',
-        message: 'after redis.set',
-        data: { key, setResult, setResultType: typeof setResult },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'run1',
-        hypothesisId: 'A',
-      }),
-    }).catch(() => {});
-    // #endregion
 
     // Verify it was stored immediately
     // eslint-disable-next-line no-console
     console.log('[subscribeUser] BEFORE redis.get verification:', { key });
-    const verifyData = await redis.get<string>(key);
+    // Retrieve as object (Upstash Redis auto-deserializes JSON)
+    const verifyData = await redis.get<PushSubscription>(key);
     // eslint-disable-next-line no-console
     console.log('[subscribeUser] AFTER redis.get verification:', {
       key,
       verifyDataFound: !!verifyData,
       verifyDataType: typeof verifyData,
-      verifyDataValue: verifyData,
-      verifyDataLength: verifyData?.length || 0,
-      verifyDataMatches: verifyData === serialized,
-      serializedLength: serialized.length,
-      serializedType: typeof serialized,
+      verifyDataEndpoint: verifyData?.endpoint,
+      verifyDataHasKeys: !!verifyData?.keys,
     });
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'actions.ts:53',
-        message: 'after redis.get verification',
-        data: {
-          key,
-          verifyDataFound: !!verifyData,
-          verifyDataLength: verifyData?.length || 0,
-          matches: verifyData === serialized,
-        },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'run1',
-        hypothesisId: 'A,E',
-      }),
-    }).catch(() => {});
-    // #endregion
-    // Check if data is missing or empty
+
+    // Check if data is missing or invalid
     if (
       !verifyData ||
-      (typeof verifyData === 'string' && verifyData.length === 0)
+      !verifyData.endpoint ||
+      !verifyData.keys ||
+      !verifyData.keys.p256dh ||
+      !verifyData.keys.auth
     ) {
       // #region agent log
       fetch(
@@ -243,21 +186,18 @@ export async function subscribeUser(sub: PushSubscription) {
       ).catch(() => {});
       // #endregion
       // eslint-disable-next-line no-console
-      console.error(
-        '[subscribeUser] Verification failed - data empty or missing:',
-        {
-          key,
-          setResult,
-          verifyData,
-          verifyDataType: typeof verifyData,
-          verifyDataLength: verifyData?.length || 0,
-          serializedLength: serialized.length,
-        }
-      );
+      console.error('[subscribeUser] Verification failed - data invalid:', {
+        key,
+        setResult,
+        verifyData,
+        verifyDataType: typeof verifyData,
+        hasEndpoint: !!verifyData?.endpoint,
+        hasKeys: !!verifyData?.keys,
+      });
       return {
         success: false,
         error:
-          'Failed to store subscription - verification failed (data empty)',
+          'Failed to store subscription - verification failed (data invalid)',
         debug: {
           key,
           setResult,
@@ -292,24 +232,24 @@ export async function subscribeUser(sub: PushSubscription) {
     // Verify again after adding to set
     // eslint-disable-next-line no-console
     console.log('[subscribeUser] BEFORE final verification:', { key });
-    const verifyAfterSet = await redis.get<string>(key);
+    const verifyAfterSet = await redis.get<PushSubscription>(key);
     // eslint-disable-next-line no-console
     console.log('[subscribeUser] AFTER final verification:', {
       key,
       verifyAfterSetFound: !!verifyAfterSet,
-      verifyAfterSetLength: verifyAfterSet?.length || 0,
+      verifyAfterSetEndpoint: verifyAfterSet?.endpoint,
     });
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        location: 'actions.ts:77',
+        location: 'actions.ts:237',
         message: 'after redis.sadd verification',
         data: {
           key,
           verifyAfterSetFound: !!verifyAfterSet,
-          verifyAfterSetLength: verifyAfterSet?.length || 0,
+          verifyAfterSetEndpoint: verifyAfterSet?.endpoint,
         },
         timestamp: Date.now(),
         sessionId: 'debug-session',
@@ -318,7 +258,7 @@ export async function subscribeUser(sub: PushSubscription) {
       }),
     }).catch(() => {});
     // #endregion
-    if (!verifyAfterSet) {
+    if (!verifyAfterSet || !verifyAfterSet.endpoint || !verifyAfterSet.keys) {
       // #region agent log
       fetch(
         'http://127.0.0.1:7242/ingest/cbbc9795-d140-4fb1-9e14-c260641f4172',
@@ -408,10 +348,12 @@ export async function getAllSubscriptions(): Promise<PushSubscription[]> {
     const orphanedKeys: string[] = [];
 
     for (const key of keys as string[]) {
-      const subData = await redis.get<string>(key);
+      // Upstash Redis auto-deserializes JSON, so get as object directly
+      const subData = await redis.get<PushSubscription>(key);
       if (subData) {
         try {
-          const parsed = JSON.parse(subData) as PushSubscription;
+          // Data is already parsed by Upstash Redis
+          const parsed = subData;
           // Validate the subscription has required fields
           if (
             parsed.endpoint &&
