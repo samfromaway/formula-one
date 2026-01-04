@@ -1,23 +1,35 @@
+'use client';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import { Box, List } from '@mui/material';
+import { Box, List, Divider } from '@mui/material';
 import MuiDrawer from '@mui/material/Drawer';
 import { ToggleDrawer } from './types';
 import Link from 'next/link';
-import GroupsIcon from '@mui/icons-material/Groups';
 import EventIcon from '@mui/icons-material/Event';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
+import usePushNotifications from '@/utils/usePushNotifications';
 
 type DrawerProps = { toggleDrawer: ToggleDrawer; isOpen: boolean };
 
-const MENU = [
-  { name: 'Races', link: '/', icon: <EventIcon /> },
-  { name: 'Teams', link: '/teams', icon: <GroupsIcon /> },
-];
-
 export default function Drawer({ toggleDrawer, isOpen }: DrawerProps) {
+  const { subscription, subscribeToPush, unsubscribeFromPush, isSupported } =
+    usePushNotifications();
+
+  const handleNotificationAction = async (
+    event: React.MouseEvent<HTMLDivElement>
+  ) => {
+    event.stopPropagation();
+    if (subscription) {
+      await unsubscribeFromPush();
+    } else {
+      await subscribeToPush();
+    }
+    toggleDrawer(false)(event);
+  };
+
   return (
     <MuiDrawer open={isOpen} onClose={toggleDrawer(false)}>
       <Box
@@ -26,20 +38,27 @@ export default function Drawer({ toggleDrawer, isOpen }: DrawerProps) {
         onKeyDown={toggleDrawer(false)}
         minWidth="240px"
       >
-        <List>
-          {MENU.map((menu) => (
-            <Link key={menu.name} href={menu.link}>
-              <a style={{ color: 'inherit', textDecoration: 'none' }}>
-                <ListItem disablePadding>
-                  <ListItemButton>
-                    <ListItemIcon>{menu.icon}</ListItemIcon>
-                    <ListItemText primary={menu.name} />
-                  </ListItemButton>
-                </ListItem>
-              </a>
-            </Link>
-          ))}
-        </List>
+        {isSupported && (
+          <>
+            <Divider />
+            <List>
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleNotificationAction}>
+                  <ListItemIcon>
+                    {subscription ? (
+                      <NotificationsOffIcon />
+                    ) : (
+                      <NotificationsIcon />
+                    )}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={subscription ? 'Unsubscribe' : 'Subscribe'}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </>
+        )}
       </Box>
     </MuiDrawer>
   );
