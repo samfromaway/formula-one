@@ -28,16 +28,56 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Test 2: Get all subscriptions
-    const subscriptions = await getAllSubscriptions();
-
+    // Test 2: Get all subscriptions - try both methods for debugging
+    let subscriptions = await getAllSubscriptions();
+    
+    // If getAllSubscriptions returns empty, check Redis directly
     if (subscriptions.length === 0) {
-      return NextResponse.json({
-        success: false,
-        message:
-          'No subscriptions found. Please subscribe first from the main page.',
-        subscriptionsCount: 0,
-      });
+      try {
+        const keys = await redis.smembers('subscriptions:all');
+        const debugInfo: any = {
+          setKeys: keys,
+          setSize: Array.isArray(keys) ? keys.length : 0,
+        };
+        
+        // Try to get subscriptions directly from Redis
+        if (Array.isArray(keys) && keys.length > 0) {
+          const directSubscriptions: PushSubscription[] = [];
+          for (const key of keys as string[]) {
+            const subData = await redis.get<string>(key);
+            if (subData) {
+              try {
+                directSubscriptions.push(JSON.parse(subData) as PushSubscription);
+              } catch (e) {
+                debugInfo.invalidKeys = debugInfo.invalidKeys || [];
+                debugInfo.invalidKeys.push({ key, error: String(e) });
+              }
+            } else {
+              debugInfo.missingKeys = debugInfo.missingKeys || [];
+              debugInfo.missingKeys.push(key);
+            }
+          }
+          subscriptions = directSubscriptions;
+          debugInfo.directSubscriptionsFound = directSubscriptions.length;
+        }
+        
+        if (subscriptions.length === 0) {
+          return NextResponse.json({
+            success: false,
+            message:
+              'No subscriptions found. Please subscribe first from the main page.',
+            subscriptionsCount: 0,
+            debug: debugInfo,
+          });
+        }
+      } catch (error) {
+        return NextResponse.json({
+          success: false,
+          error: 'Error checking subscriptions',
+          details: String(error),
+          subscriptionsCount: 0,
+        });
+      }
     }
 
     // Test 3: Send test notification to all subscribers

@@ -47,6 +47,25 @@ function PushNotificationManager() {
     setSubscription(sub);
   }
 
+  // Helper to properly serialize PushSubscription
+  function serializeSubscription(sub: PushSubscription) {
+    // The browser's JSON.stringify automatically converts ArrayBuffers to base64url
+    // But we need to ensure the structure matches what web-push expects
+    const serialized = JSON.parse(JSON.stringify(sub));
+
+    // Ensure keys are strings (they should be after JSON.stringify)
+    if (serialized.keys) {
+      return {
+        endpoint: serialized.endpoint,
+        keys: {
+          p256dh: serialized.keys.p256dh,
+          auth: serialized.keys.auth,
+        },
+      };
+    }
+    return serialized;
+  }
+
   async function subscribeToPush() {
     const registration = await navigator.serviceWorker.ready;
     const sub = await registration.pushManager.subscribe({
@@ -56,14 +75,17 @@ function PushNotificationManager() {
       ),
     });
     setSubscription(sub);
-    const serializedSub = JSON.parse(JSON.stringify(sub));
-    await subscribeUser(serializedSub);
+    const serializedSub = serializeSubscription(sub);
+    const result = await subscribeUser(serializedSub);
+    if (!result.success) {
+      console.error('Failed to subscribe:', result.error);
+    }
   }
 
   async function unsubscribeFromPush() {
     if (subscription) {
       await subscription.unsubscribe();
-      const serializedSub = JSON.parse(JSON.stringify(subscription));
+      const serializedSub = serializeSubscription(subscription);
       await unsubscribeUser(serializedSub);
     }
     setSubscription(null);
@@ -71,7 +93,7 @@ function PushNotificationManager() {
 
   const sendTestNotification = useCallback(async () => {
     if (subscription) {
-      const serializedSub = JSON.parse(JSON.stringify(subscription));
+      const serializedSub = serializeSubscription(subscription);
       await sendNotification(serializedSub, message);
     }
   }, [subscription, message]);
@@ -151,45 +173,6 @@ function PushNotificationManager() {
   );
 }
 
-function InstallPrompt() {
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    setIsIOS(
-      /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
-    );
-
-    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
-  }, []);
-
-  if (isStandalone) {
-    return null; // Don't show install button if already installed
-  }
-
-  return (
-    <div>
-      <h3>Install App</h3>
-      <button>Add to Home Screen</button>
-      {isIOS && (
-        <p>
-          To install this app on your iOS device, tap the share button
-          <span role="img" aria-label="share icon">
-            {' '}
-            ⎋{' '}
-          </span>
-          and then "Add to Home Screen"
-          <span role="img" aria-label="plus icon">
-            {' '}
-            ➕{' '}
-          </span>
-          .
-        </p>
-      )}
-    </div>
-  );
-}
-
 const Page = () => {
   const [timezone, setTimezone] = useState('Europe/Zurich');
   const { data, errors, isLoading } = useRaces();
@@ -241,7 +224,6 @@ const Page = () => {
         <title>Formula 1: Races</title>
       </Head>
       <PushNotificationManager />
-      <InstallPrompt />
       <Box p={4} />
       <TimezoneSelect value={timezone} handleChange={handleTimezoneChange} />
       <Spacer space={2} />
