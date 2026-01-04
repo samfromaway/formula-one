@@ -35,24 +35,55 @@ export async function subscribeUser(sub: PushSubscription) {
     // Serialize the subscription
     const serialized = JSON.stringify(sub);
 
+    // eslint-disable-next-line no-console
+    console.log('Storing subscription:', {
+      key,
+      endpoint: sub.endpoint,
+      hasKeys: !!sub.keys,
+      serializedLength: serialized.length,
+    });
+
     // Store the subscription data first
     const setResult = await redis.set(key, serialized);
 
-    // Verify it was stored
+    // eslint-disable-next-line no-console
+    console.log('Redis set result:', setResult);
+
+    // Verify it was stored immediately
     const verifyData = await redis.get<string>(key);
     if (!verifyData) {
       // eslint-disable-next-line no-console
       console.error(
-        'Failed to verify subscription storage - data not found after set'
+        'Failed to verify subscription storage - data not found after set',
+        { key, setResult }
       );
       return {
         success: false,
         error: 'Failed to store subscription - verification failed',
+        debug: { key, setResult, verifyData: null },
       };
     }
 
+    // eslint-disable-next-line no-console
+    console.log('Verification successful, data length:', verifyData.length);
+
     // Also maintain a set of all subscription keys for easy retrieval
-    await redis.sadd('subscriptions:all', key);
+    const saddResult = await redis.sadd('subscriptions:all', key);
+
+    // eslint-disable-next-line no-console
+    console.log('Added to set, result:', saddResult);
+
+    // Verify again after adding to set
+    const verifyAfterSet = await redis.get<string>(key);
+    if (!verifyAfterSet) {
+      // eslint-disable-next-line no-console
+      console.error('Data disappeared after adding to set!', { key });
+      return {
+        success: false,
+        error: 'Data lost after adding to set',
+        debug: { key, setResult, saddResult },
+      };
+    }
 
     return { success: true };
   } catch (error) {

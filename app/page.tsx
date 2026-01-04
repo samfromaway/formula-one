@@ -47,39 +47,113 @@ function PushNotificationManager() {
     setSubscription(sub);
   }
 
+  // Helper to convert ArrayBuffer to base64url string
+  function arrayBufferToBase64(buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
+  }
+
   // Helper to properly serialize PushSubscription
   function serializeSubscription(sub: PushSubscription) {
-    // The browser's JSON.stringify automatically converts ArrayBuffers to base64url
-    // But we need to ensure the structure matches what web-push expects
-    const serialized = JSON.parse(JSON.stringify(sub));
+    // Manually extract keys from the PushSubscription object
+    // The browser's PushSubscription.getKey() returns ArrayBuffers
+    const p256dh = sub.getKey ? sub.getKey('p256dh') : null;
+    const auth = sub.getKey ? sub.getKey('auth') : null;
 
-    // Ensure keys are strings (they should be after JSON.stringify)
-    if (serialized.keys) {
+    if (!p256dh || !auth) {
+      // Fallback to JSON.stringify if getKey doesn't work
+      const serialized = JSON.parse(JSON.stringify(sub));
       return {
-        endpoint: serialized.endpoint,
+        endpoint: sub.endpoint,
         keys: {
-          p256dh: serialized.keys.p256dh,
-          auth: serialized.keys.auth,
+          p256dh: serialized.keys?.p256dh || '',
+          auth: serialized.keys?.auth || '',
         },
       };
     }
-    return serialized;
+
+    // Convert ArrayBuffers to base64url strings
+    return {
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: arrayBufferToBase64(p256dh),
+        auth: arrayBufferToBase64(auth),
+      },
+    };
   }
 
   async function subscribeToPush() {
-    const registration = await navigator.serviceWorker.ready;
-    const sub = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-      ),
-    });
-    setSubscription(sub);
-    const serializedSub = serializeSubscription(sub);
-    const result = await subscribeUser(serializedSub);
-    if (!result.success) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+        ),
+      });
+      setSubscription(sub);
+
+      // Log the raw subscription for debugging
       // eslint-disable-next-line no-console
-      console.error('Failed to subscribe:', result.error);
+      console.log('Raw subscription:', {
+        endpoint: sub.endpoint,
+        keys: sub.getKey
+          ? {
+              p256dh: sub.getKey('p256dh') ? 'present' : 'missing',
+              auth: sub.getKey('auth') ? 'present' : 'missing',
+            }
+          : 'no getKey method',
+      });
+
+      const serializedSub = serializeSubscription(sub);
+
+      // Log the serialized subscription
+      // eslint-disable-next-line no-console
+      console.log('Serialized subscription:', {
+        endpoint: serializedSub.endpoint,
+        hasKeys: !!serializedSub.keys,
+        keysType: typeof serializedSub.keys,
+        keysPresent: serializedSub.keys ? Object.keys(serializedSub.keys) : [],
+        p256dhType: serializedSub.keys?.p256dh
+          ? typeof serializedSub.keys.p256dh
+          : 'missing',
+        authType: serializedSub.keys?.auth
+          ? typeof serializedSub.keys.auth
+          : 'missing',
+      });
+
+      const result = await subscribeUser(serializedSub);
+
+      // eslint-disable-next-line no-console
+      console.log('Subscribe result:', result);
+
+      if (!result.success) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to subscribe:', result.error, result);
+        alert(
+          `Failed to subscribe: ${result.error}${
+            result.details ? ` - ${result.details}` : ''
+          }${result.debug ? ` - Debug: ${JSON.stringify(result.debug)}` : ''}`
+        );
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('Successfully subscribed!');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error in subscribeToPush:', error);
+      alert(
+        `Error subscribing: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
