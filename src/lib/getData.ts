@@ -46,7 +46,6 @@ export default async function getData() {
   const races: RaceData[] = base.RaceTable.Races;
 
   const currentRaces = races.filter((e) => e.season === '2026');
-
   const raceData = currentRaces.map((e) => ({
     ...e,
     events: [
@@ -67,6 +66,5 @@ export default async function getData() {
       { date: e.date, time: e.time, type: 'Race' },
     ],
   }));
-
   return { data: raceData, errors: null };
 }
