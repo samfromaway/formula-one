@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import parseISO from 'date-fns/parseISO';
 import intervalToDuration from 'date-fns/intervalToDuration';
+import differenceInDays from 'date-fns/differenceInDays';
 import { Box, Grid, Typography } from '@mui/material';
 
 type TimerProps = {
@@ -23,8 +24,12 @@ const Timer = ({ date }: TimerProps) => {
     };
   });
 
+  // Calculate actual total days between the two dates (accounts for variable month lengths)
+  const startDate = parseISO(date);
+  const totalDays = differenceInDays(startDate, now);
+
   const times = [
-    { label: 'Days', data: intervalDuration.days },
+    { label: 'Days', data: totalDays },
     { label: 'Hours', data: intervalDuration.hours },
     { label: 'Minutes', data: intervalDuration.minutes },
     { label: 'Seconds', data: intervalDuration.seconds },
