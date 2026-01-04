@@ -23,14 +23,46 @@ function getSubscriptionKey(sub: PushSubscription): string {
 export async function subscribeUser(sub: PushSubscription) {
   try {
     const key = getSubscriptionKey(sub);
-    await redis.set(key, JSON.stringify(sub));
+
+    // Validate subscription has required fields
+    if (!sub.endpoint) {
+      return { success: false, error: 'Subscription missing endpoint' };
+    }
+    if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+      return { success: false, error: 'Subscription missing keys' };
+    }
+
+    // Serialize the subscription
+    const serialized = JSON.stringify(sub);
+
+    // Store the subscription data first
+    const setResult = await redis.set(key, serialized);
+
+    // Verify it was stored
+    const verifyData = await redis.get<string>(key);
+    if (!verifyData) {
+      // eslint-disable-next-line no-console
+      console.error(
+        'Failed to verify subscription storage - data not found after set'
+      );
+      return {
+        success: false,
+        error: 'Failed to store subscription - verification failed',
+      };
+    }
+
     // Also maintain a set of all subscription keys for easy retrieval
     await redis.sadd('subscriptions:all', key);
+
     return { success: true };
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error storing subscription:', error);
-    return { success: false, error: 'Failed to store subscription' };
+    return {
+      success: false,
+      error: 'Failed to store subscription',
+      details: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 
@@ -52,17 +84,44 @@ export async function getAllSubscriptions(): Promise<PushSubscription[]> {
   try {
     const keys = await redis.smembers('subscriptions:all');
     const subscriptions: PushSubscription[] = [];
+    const orphanedKeys: string[] = [];
 
     for (const key of keys as string[]) {
       const subData = await redis.get<string>(key);
       if (subData) {
         try {
-          subscriptions.push(JSON.parse(subData) as PushSubscription);
+          const parsed = JSON.parse(subData) as PushSubscription;
+          // Validate the subscription has required fields
+          if (
+            parsed.endpoint &&
+            parsed.keys &&
+            parsed.keys.p256dh &&
+            parsed.keys.auth
+          ) {
+            subscriptions.push(parsed);
+          } else {
+            // Invalid structure, mark for cleanup
+            orphanedKeys.push(key);
+          }
         } catch (e) {
-          // Invalid subscription, remove it
-          await redis.del(key);
-          await redis.srem('subscriptions:all', key);
+          // Invalid JSON, mark for cleanup
+          orphanedKeys.push(key);
         }
+      } else {
+        // Key in set but no data, mark for cleanup
+        orphanedKeys.push(key);
+      }
+    }
+
+    // Clean up orphaned keys
+    if (orphanedKeys.length > 0) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Cleaning up ${orphanedKeys.length} orphaned subscription keys`
+      );
+      for (const key of orphanedKeys) {
+        await redis.del(key);
+        await redis.srem('subscriptions:all', key);
       }
     }
 

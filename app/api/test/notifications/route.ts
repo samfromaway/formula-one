@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Test 2: Get all subscriptions - try both methods for debugging
     let subscriptions = await getAllSubscriptions();
-    
+
     // If getAllSubscriptions returns empty, check Redis directly
     if (subscriptions.length === 0) {
       try {
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
           setKeys: keys,
           setSize: Array.isArray(keys) ? keys.length : 0,
         };
-        
+
         // Try to get subscriptions directly from Redis
         if (Array.isArray(keys) && keys.length > 0) {
           const directSubscriptions: PushSubscription[] = [];
@@ -47,7 +47,17 @@ export async function GET(request: NextRequest) {
             const subData = await redis.get<string>(key);
             if (subData) {
               try {
-                directSubscriptions.push(JSON.parse(subData) as PushSubscription);
+                const parsed = JSON.parse(subData) as PushSubscription;
+                // Validate the parsed subscription
+                if (parsed.endpoint && parsed.keys) {
+                  directSubscriptions.push(parsed);
+                } else {
+                  debugInfo.invalidKeys = debugInfo.invalidKeys || [];
+                  debugInfo.invalidKeys.push({
+                    key,
+                    error: 'Missing endpoint or keys',
+                  });
+                }
               } catch (e) {
                 debugInfo.invalidKeys = debugInfo.invalidKeys || [];
                 debugInfo.invalidKeys.push({ key, error: String(e) });
@@ -60,7 +70,7 @@ export async function GET(request: NextRequest) {
           subscriptions = directSubscriptions;
           debugInfo.directSubscriptionsFound = directSubscriptions.length;
         }
-        
+
         if (subscriptions.length === 0) {
           return NextResponse.json({
             success: false,
