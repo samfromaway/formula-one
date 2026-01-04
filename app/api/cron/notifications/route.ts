@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { Redis } from '@upstash/redis';
 import getData from '@/lib/getData';
+import type { PushSubscription } from '@/types/push-subscription';
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
@@ -16,7 +17,12 @@ webpush.setVapidDetails(
 );
 
 // Generate a unique notification ID for deduplication
-function getNotificationId(raceName: string, eventType: string, eventDate: string, eventTime: string): string {
+function getNotificationId(
+  raceName: string,
+  eventType: string,
+  eventDate: string,
+  eventTime: string
+): string {
   return `notification:${raceName}:${eventType}:${eventDate}:${eventTime}`;
 }
 
@@ -106,10 +112,13 @@ export async function GET(request: NextRequest) {
 
         // Parse event date/time as UTC (API returns UTC times)
         const eventDateTime = new Date(`${event.date}T${event.time}Z`);
-        
+
         // Check if event is between 15 minutes ago and 1 hour from now
         // This accounts for the cron running every 15 minutes
-        if (eventDateTime >= fifteenMinutesAgo && eventDateTime <= oneHourFromNow) {
+        if (
+          eventDateTime >= fifteenMinutesAgo &&
+          eventDateTime <= oneHourFromNow
+        ) {
           upcomingEvents.push({
             raceName: race.raceName,
             eventType: event.type,
@@ -133,7 +142,7 @@ export async function GET(request: NextRequest) {
     const subscriptions: PushSubscription[] = [];
     try {
       const keys = await redis.smembers('subscriptions:all');
-      
+
       for (const key of keys as string[]) {
         const subData = await redis.get<string>(key);
         if (subData) {
@@ -183,9 +192,12 @@ export async function GET(request: NextRequest) {
       const minutesUntilEvent = Math.round(
         (event.eventDate.getTime() - now.getTime()) / (1000 * 60)
       );
-      const timeText = minutesUntilEvent <= 0 
-        ? 'starting now' 
-        : `in ${minutesUntilEvent} minute${minutesUntilEvent !== 1 ? 's' : ''}`;
+      const timeText =
+        minutesUntilEvent <= 0
+          ? 'starting now'
+          : `in ${minutesUntilEvent} minute${
+              minutesUntilEvent !== 1 ? 's' : ''
+            }`;
 
       const title = `${event.raceName} - ${event.eventType}`;
       const body = `Starts ${timeText}`;
@@ -196,7 +208,9 @@ export async function GET(request: NextRequest) {
       );
 
       const results = await Promise.allSettled(sendPromises);
-      const successCount = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+      const successCount = results.filter(
+        (r) => r.status === 'fulfilled' && r.value
+      ).length;
 
       if (successCount > 0) {
         await markNotificationSent(notificationId);
@@ -220,4 +234,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

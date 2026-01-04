@@ -2,6 +2,7 @@
 
 import webpush from 'web-push';
 import { Redis } from '@upstash/redis';
+import type { PushSubscription } from '@/types/push-subscription';
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
